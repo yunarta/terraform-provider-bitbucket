@@ -10,14 +10,13 @@ import (
 )
 
 type RepositoryModel struct {
-	ID                       types.String `tfsdk:"id"`
-	RetainOnDelete           types.Bool   `tfsdk:"retain_on_delete"`
-	RetainPermissionOnDelete types.Bool   `tfsdk:"retain_permissions_on_delete"`
-	Project                  types.String `tfsdk:"project"`
-	Slug                     types.String `tfsdk:"slug"`
-	Name                     types.String `tfsdk:"name"`
-	Description              types.String `tfsdk:"description"`
-	Readme                   types.String `tfsdk:"readme"`
+	ID             types.String `tfsdk:"id"`
+	RetainOnDelete types.Bool   `tfsdk:"retain_on_delete"`
+	Project        types.String `tfsdk:"project"`
+	Slug           types.String `tfsdk:"slug"`
+	Name           types.String `tfsdk:"name"`
+	Description    types.String `tfsdk:"description"`
+	Readme         types.String `tfsdk:"readme"`
 
 	AssignmentVersion types.String `tfsdk:"assignment_version"`
 	Assignments       types.List   `tfsdk:"assignments"`
@@ -40,17 +39,16 @@ func (m RepositoryModel) getAssignment(ctx context.Context) (Assignments, diag.D
 
 func NewRepositoryModel(repository *bitbucket.Repository, plan RepositoryModel, assignmentResult *AssignmentResult) *RepositoryModel {
 	return &RepositoryModel{
-		ID:                       types.StringValue(fmt.Sprintf("%v", repository.ID)),
-		Slug:                     types.StringValue(repository.Slug),
-		Name:                     types.StringValue(repository.Name),
-		Description:              util.NullString(repository.Description),
-		Project:                  types.StringValue(repository.Project.Key),
-		RetainOnDelete:           plan.RetainOnDelete,
-		RetainPermissionOnDelete: plan.RetainPermissionOnDelete,
-		Readme:                   plan.Readme,
-		AssignmentVersion:        plan.AssignmentVersion,
-		Assignments:              plan.Assignments,
-		ComputedUsers:            assignmentResult.ComputedUsers,
-		ComputedGroups:           assignmentResult.ComputedGroups,
+		ID:                types.StringValue(fmt.Sprintf("%v", repository.ID)),
+		Slug:              types.StringValue(repository.Slug),
+		Name:              types.StringValue(repository.Name),
+		Description:       util.NullString(repository.Description),
+		Project:           types.StringValue(repository.Project.Key),
+		RetainOnDelete:    plan.RetainOnDelete,
+		Readme:            plan.Readme,
+		AssignmentVersion: plan.AssignmentVersion,
+		Assignments:       plan.Assignments,
+		ComputedUsers:     assignmentResult.ComputedUsers,
+		ComputedGroups:    assignmentResult.ComputedGroups,
 	}
 }

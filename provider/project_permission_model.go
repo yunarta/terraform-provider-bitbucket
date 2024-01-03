@@ -7,6 +7,7 @@ import (
 )
 
 type ProjectPermissionsModel struct {
+	RetainOnDelete    types.Bool   `tfsdk:"retain_on_delete"`
 	Key               types.String `tfsdk:"key"`
 	AssignmentVersion types.String `tfsdk:"assignment_version"`
 	Assignments       types.List   `tfsdk:"assignments"`
@@ -29,6 +30,7 @@ func (m ProjectPermissionsModel) getAssignment(ctx context.Context) (Assignments
 
 func NewProjectPermissionsModel(plan ProjectPermissionsModel, assignmentResult *AssignmentResult) *ProjectPermissionsModel {
 	return &ProjectPermissionsModel{
+		RetainOnDelete:    plan.RetainOnDelete,
 		Key:               plan.Key,
 		AssignmentVersion: plan.AssignmentVersion,
 		Assignments:       plan.Assignments,

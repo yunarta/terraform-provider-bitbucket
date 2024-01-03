@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/yunarta/terraform-api-transport/transport"
+	"github.com/yunarta/terraform-atlassian-api-client/bitbucket"
 )
 
 type BitbucketProvider struct {
@@ -25,8 +27,16 @@ func (p *BitbucketProvider) Schema(ctx context.Context, request provider.SchemaR
 					"endpoint": schema.StringAttribute{
 						Required: true,
 					},
+					"username": schema.StringAttribute{
+						Optional:  true,
+						Sensitive: false,
+					},
+					"password": schema.StringAttribute{
+						Optional:  true,
+						Sensitive: true,
+					},
 					"token": schema.StringAttribute{
-						Required:  true,
+						Optional:  true,
 						Sensitive: true,
 					},
 				},
@@ -36,7 +46,7 @@ func (p *BitbucketProvider) Schema(ctx context.Context, request provider.SchemaR
 }
 
 func (p *BitbucketProvider) Configure(ctx context.Context, request provider.ConfigureRequest, response *provider.ConfigureResponse) {
-	var config *BitbucketProviderConfig
+	var config BitbucketProviderConfig
 
 	diags := request.Config.Get(ctx, &config)
 	response.Diagnostics.Append(diags...)
@@ -44,8 +54,50 @@ func (p *BitbucketProvider) Configure(ctx context.Context, request provider.Conf
 		return
 	}
 
-	response.DataSourceData = config
-	response.ResourceData = config
+	// Check if token is provided
+	if !config.Bitbucket.Token.IsNull() {
+		// If token is provided, username and password should not be set
+		if !config.Bitbucket.Username.IsNull() || !config.Bitbucket.Password.IsNull() {
+			response.Diagnostics.AddError(
+				"Invalid Configuration",
+				"When 'token' is provided, 'username' and 'password' must not be set.",
+			)
+			return
+		}
+	} else {
+		// If token is not provided, both username and password are required
+		if config.Bitbucket.Username.IsNull() || config.Bitbucket.Password.IsNull() {
+			response.Diagnostics.AddError(
+				"Invalid Configuration",
+				"Both 'username' and 'password' must be set when 'token' is not provided.",
+			)
+			return
+		}
+	}
+
+	var authentication transport.Authentication
+	if !config.Bitbucket.Token.IsNull() {
+		authentication = transport.BearerAuthentication{
+			Token: config.Bitbucket.Token.ValueString(),
+		}
+	} else {
+		authentication = transport.BasicAuthentication{
+			Username: config.Bitbucket.Username.ValueString(),
+			Password: config.Bitbucket.Password.ValueString(),
+		}
+	}
+
+	providerData := &BitbucketProviderData{
+		config: config,
+		client: bitbucket.NewBitbucketClient(
+			transport.NewHttpPayloadTransport(config.Bitbucket.EndPoint.ValueString(),
+				authentication,
+			),
+		),
+	}
+
+	response.DataSourceData = providerData
+	response.ResourceData = providerData
 }
 
 func (p *BitbucketProvider) DataSources(ctx context.Context) []func() datasource.DataSource {

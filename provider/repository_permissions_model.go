@@ -7,13 +7,13 @@ import (
 )
 
 type RepositoryPermissionsModel struct {
-	RetainPermissionOnDelete types.Bool   `tfsdk:"retain_permissions_on_delete"`
-	Project                  types.String `tfsdk:"project"`
-	Slug                     types.String `tfsdk:"slug"`
-	AssignmentVersion        types.String `tfsdk:"assignment_version"`
-	Assignments              types.List   `tfsdk:"assignments"`
-	ComputedUsers            types.List   `tfsdk:"computed_users"`
-	ComputedGroups           types.List   `tfsdk:"computed_groups"`
+	RetainOnDelete    types.Bool   `tfsdk:"retain_on_delete"`
+	Project           types.String `tfsdk:"project"`
+	Slug              types.String `tfsdk:"slug"`
+	AssignmentVersion types.String `tfsdk:"assignment_version"`
+	Assignments       types.List   `tfsdk:"assignments"`
+	ComputedUsers     types.List   `tfsdk:"computed_users"`
+	ComputedGroups    types.List   `tfsdk:"computed_groups"`
 }
 
 var _ RepositoryPermissionInterface = &RepositoryPermissionsModel{}
@@ -31,12 +31,12 @@ func (m RepositoryPermissionsModel) getAssignment(ctx context.Context) (Assignme
 
 func NewRepositoryPermissionsModel(plan RepositoryPermissionsModel, assignmentResult *AssignmentResult) *RepositoryPermissionsModel {
 	return &RepositoryPermissionsModel{
-		RetainPermissionOnDelete: plan.RetainPermissionOnDelete,
-		Project:                  plan.Project,
-		Slug:                     plan.Slug,
-		AssignmentVersion:        plan.AssignmentVersion,
-		Assignments:              plan.Assignments,
-		ComputedUsers:            assignmentResult.ComputedUsers,
-		ComputedGroups:           assignmentResult.ComputedGroups,
+		RetainOnDelete:    plan.RetainOnDelete,
+		Project:           plan.Project,
+		Slug:              plan.Slug,
+		AssignmentVersion: plan.AssignmentVersion,
+		Assignments:       plan.Assignments,
+		ComputedUsers:     assignmentResult.ComputedUsers,
+		ComputedGroups:    assignmentResult.ComputedGroups,
 	}
 }

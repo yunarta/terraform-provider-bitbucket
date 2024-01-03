@@ -2,14 +2,13 @@ package provider
 
 import (
 	"context"
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/yunarta/terraform-api-transport/transport"
 	"github.com/yunarta/terraform-atlassian-api-client/bitbucket"
 	"github.com/yunarta/terraform-provider-commons/util"
 )
@@ -19,6 +18,7 @@ var (
 	_ resource.ResourceWithConfigure   = &ProjectPermissionsResource{}
 	_ resource.ResourceWithImportState = &ProjectPermissionsResource{}
 	_ ProjectPermissionResource        = &ProjectPermissionsResource{}
+	_ ConfigurableReceiver             = &ProjectPermissionsResource{}
 )
 
 func NewProjectPermissionsResource() resource.Resource {
@@ -26,12 +26,17 @@ func NewProjectPermissionsResource() resource.Resource {
 }
 
 type ProjectPermissionsResource struct {
+	config BitbucketProviderConfig
 	client *bitbucket.Client
-	model  *BitbucketProviderConfig
 }
 
 func (receiver *ProjectPermissionsResource) getClient() *bitbucket.Client {
 	return receiver.client
+}
+
+func (receiver *ProjectPermissionsResource) setConfig(config BitbucketProviderConfig, client *bitbucket.Client) {
+	receiver.config = config
+	receiver.client = client
 }
 
 func (receiver *ProjectPermissionsResource) Metadata(ctx context.Context, request resource.MetadataRequest, response *resource.MetadataResponse) {
@@ -41,6 +46,11 @@ func (receiver *ProjectPermissionsResource) Metadata(ctx context.Context, reques
 func (receiver *ProjectPermissionsResource) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"retain_on_delete": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(true),
+			},
 			"key": schema.StringAttribute{
 				Required: true,
 				PlanModifiers: []planmodifier.String{
@@ -60,27 +70,7 @@ func (receiver *ProjectPermissionsResource) Schema(ctx context.Context, request 
 }
 
 func (receiver *ProjectPermissionsResource) Configure(ctx context.Context, request resource.ConfigureRequest, response *resource.ConfigureResponse) {
-	if request.ProviderData == nil {
-		return
-	}
-
-	config, ok := request.ProviderData.(*BitbucketProviderConfig)
-	if !ok {
-		response.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *AtlassianCloudProviderModel, got: %T. Please report this issue to the provider developers.", request.ProviderData),
-		)
-		return
-	}
-
-	receiver.model = config
-	receiver.client = bitbucket.NewBitbucketClient(
-		transport.NewHttpPayloadTransport(config.Bitbucket.EndPoint.ValueString(),
-			transport.BearerAuthentication{
-				Token: config.Bitbucket.Token.ValueString(),
-			},
-		),
-	)
+	ConfigureResource(receiver, ctx, request, response)
 }
 
 func (receiver *ProjectPermissionsResource) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
@@ -173,9 +163,11 @@ func (receiver *ProjectPermissionsResource) Delete(ctx context.Context, request 
 		return
 	}
 
-	diags = DeleteProjectAssignments(ctx, receiver, state)
-	if util.TestDiagnostic(&response.Diagnostics, diags) {
-		return
+	if !state.RetainOnDelete.ValueBool() {
+		diags = DeleteProjectAssignments(ctx, receiver, state)
+		if util.TestDiagnostic(&response.Diagnostics, diags) {
+			return
+		}
 	}
 
 	response.State.RemoveResource(ctx)
