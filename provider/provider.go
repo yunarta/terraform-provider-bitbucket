@@ -101,14 +101,18 @@ func (p *BitbucketProvider) Configure(ctx context.Context, request provider.Conf
 }
 
 func (p *BitbucketProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{}
+	return []func() datasource.DataSource{
+		NewRepositoryPermissionsDataSource,
+		NewProjectPermissionsDataSource,
+	}
 }
 
 func (p *BitbucketProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewRepositoryResource,
-		NewProjectPermissionsResource,
 		NewRepositoryPermissionsResource,
+		NewProjectResource,
+		NewProjectPermissionsResource,
 	}
 }
 
