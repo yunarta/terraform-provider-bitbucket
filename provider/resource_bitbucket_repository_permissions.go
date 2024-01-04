@@ -16,7 +16,7 @@ var (
 	_ resource.Resource                = &RepositoryPermissionsResource{}
 	_ resource.ResourceWithConfigure   = &RepositoryPermissionsResource{}
 	_ resource.ResourceWithImportState = &RepositoryPermissionsResource{}
-	_ RepositoryPermissionResource     = &RepositoryResource{}
+	_ RepositoryPermissionReceiver     = &RepositoryResource{}
 	_ ConfigurableReceiver             = &RepositoryResource{}
 )
 

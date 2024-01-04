@@ -6,7 +6,7 @@ import (
 	"github.com/yunarta/terraform-atlassian-api-client/bitbucket"
 )
 
-type RepositoryPermissionResource interface {
+type RepositoryPermissionReceiver interface {
 	getClient() *bitbucket.Client
 }
 
@@ -15,7 +15,7 @@ type RepositoryPermissionInterface interface {
 	getProjectKeyAndSlug(ctx context.Context) (projectKey string, slug string)
 }
 
-func CreateRepositoryAssignments(ctx context.Context, receiver RepositoryPermissionResource, plan RepositoryPermissionInterface) (*AssignmentResult, diag.Diagnostics) {
+func CreateRepositoryAssignments(ctx context.Context, receiver RepositoryPermissionReceiver, plan RepositoryPermissionInterface) (*AssignmentResult, diag.Diagnostics) {
 	assignments, diags := plan.getAssignment(ctx)
 	if diags != nil {
 		return nil, diags
@@ -38,7 +38,7 @@ func CreateRepositoryAssignments(ctx context.Context, receiver RepositoryPermiss
 	)
 }
 
-func ComputeRepositoryAssignments(ctx context.Context, receiver RepositoryPermissionResource, state RepositoryPermissionInterface) (*AssignmentResult, diag.Diagnostics) {
+func ComputeRepositoryAssignments(ctx context.Context, receiver RepositoryPermissionReceiver, state RepositoryPermissionInterface) (*AssignmentResult, diag.Diagnostics) {
 	assignments, diags := state.getAssignment(ctx)
 	if diags != nil {
 		return nil, diags
@@ -58,7 +58,7 @@ func ComputeRepositoryAssignments(ctx context.Context, receiver RepositoryPermis
 	return ComputeAssignment(ctx, assignedPermissions, *assignmentOrder)
 }
 
-func UpdateRepositoryAssignments(ctx context.Context, receiver RepositoryPermissionResource,
+func UpdateRepositoryAssignments(ctx context.Context, receiver RepositoryPermissionReceiver,
 	plan RepositoryPermissionInterface,
 	state RepositoryPermissionInterface,
 	forceUpdate bool) (*AssignmentResult, diag.Diagnostics) {
@@ -98,7 +98,7 @@ func UpdateRepositoryAssignments(ctx context.Context, receiver RepositoryPermiss
 	)
 }
 
-func DeleteRepositoryAssignments(ctx context.Context, receiver RepositoryPermissionResource, state RepositoryPermissionInterface) diag.Diagnostics {
+func DeleteRepositoryAssignments(ctx context.Context, receiver RepositoryPermissionReceiver, state RepositoryPermissionInterface) diag.Diagnostics {
 	assignments, diags := state.getAssignment(ctx)
 	if diags != nil {
 		return diags

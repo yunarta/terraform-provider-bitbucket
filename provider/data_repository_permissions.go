@@ -91,7 +91,7 @@ func (receiver *RepositoryPermissionsDataSource) Read(ctx context.Context, reque
 		return
 	}
 
-	users, groups, diags := CreateAttestation(ctx, permissions, response)
+	users, groups, diags := CreateAttestation(ctx, permissions, &response.Diagnostics)
 	if util.TestDiagnostic(&response.Diagnostics, diags) {
 		return
 	}

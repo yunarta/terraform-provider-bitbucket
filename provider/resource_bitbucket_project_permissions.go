@@ -17,7 +17,7 @@ var (
 	_ resource.Resource                = &ProjectPermissionsResource{}
 	_ resource.ResourceWithConfigure   = &ProjectPermissionsResource{}
 	_ resource.ResourceWithImportState = &ProjectPermissionsResource{}
-	_ ProjectPermissionResource        = &ProjectPermissionsResource{}
+	_ ProjectPermissionsReceiver       = &ProjectPermissionsResource{}
 	_ ConfigurableReceiver             = &ProjectPermissionsResource{}
 )
 

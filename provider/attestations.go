@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -10,7 +9,7 @@ import (
 	"github.com/yunarta/terraform-provider-commons/util"
 )
 
-func CreateAttestation(ctx context.Context, permissions *bitbucket.ObjectPermission, response *datasource.ReadResponse) (basetypes.MapValue, basetypes.MapValue, diag.Diagnostics) {
+func CreateAttestation(ctx context.Context, permissions *bitbucket.ObjectPermission, diagnostics *diag.Diagnostics) (basetypes.MapValue, basetypes.MapValue, diag.Diagnostics) {
 	var userPermissionsMap = make(map[string][]string)
 	var groupPermissionsMap = make(map[string][]string)
 	for _, user := range permissions.Users {
@@ -37,14 +36,14 @@ func CreateAttestation(ctx context.Context, permissions *bitbucket.ObjectPermiss
 	users, diags := types.MapValueFrom(ctx, types.ListType{
 		ElemType: types.StringType,
 	}, userPermissionsMap)
-	if util.TestDiagnostic(&response.Diagnostics, diags) {
+	if util.TestDiagnostic(diagnostics, diags) {
 		return basetypes.MapValue{}, basetypes.MapValue{}, diags
 	}
 
 	groups, diags := types.MapValueFrom(ctx, types.ListType{
 		ElemType: types.StringType,
 	}, groupPermissionsMap)
-	if util.TestDiagnostic(&response.Diagnostics, diags) {
+	if util.TestDiagnostic(diagnostics, diags) {
 		return basetypes.MapValue{}, basetypes.MapValue{}, diags
 	}
 

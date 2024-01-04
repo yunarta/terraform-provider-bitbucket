@@ -18,7 +18,7 @@ var (
 	_ resource.Resource                = &ProjectResource{}
 	_ resource.ResourceWithConfigure   = &ProjectResource{}
 	_ resource.ResourceWithImportState = &ProjectResource{}
-	_ ProjectPermissionResource        = &ProjectResource{}
+	_ ProjectPermissionsReceiver       = &ProjectResource{}
 	_ ConfigurableReceiver             = &ProjectResource{}
 )
 
@@ -174,7 +174,7 @@ func (receiver *ProjectResource) Update(ctx context.Context, request resource.Up
 		Description: plan.Description.ValueString(),
 	})
 
-	if util.TestError(&response.Diagnostics, err, "Failed to create project") {
+	if util.TestError(&response.Diagnostics, err, "Failed to update project") {
 		return
 	}
 
@@ -204,8 +204,8 @@ func (receiver *ProjectResource) Delete(ctx context.Context, request resource.De
 	}
 
 	if !state.RetainOnDelete.ValueBool() {
-		diags = DeleteProjectAssignments(ctx, receiver, state)
-		if util.TestDiagnostic(&response.Diagnostics, diags) {
+		err := receiver.client.ProjectService().Delete(state.Key.ValueString())
+		if util.TestError(&response.Diagnostics, err, "Failed to delete project") {
 			return
 		}
 	}
