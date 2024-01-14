@@ -24,7 +24,7 @@ func main() {
 	flag.Parse()
 
 	opts := providerserver.ServeOpts{
-		Address: "mobilesolutionworks.com/development-platform/bitbucket",
+		Address: "github.com/yunarta/bitbucket",
 		Debug:   debug,
 	}
 
