@@ -134,7 +134,7 @@ func (receiver *RepositoryResource) Create(ctx context.Context, request resource
 		return
 	}
 
-	if plan.Readme.IsNull() {
+	if !plan.Readme.IsNull() {
 		_, err = receiver.client.RepositoryService().Initialize(
 			plan.Project.ValueString(),
 			plan.Name.ValueString(),
