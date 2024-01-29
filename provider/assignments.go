@@ -365,6 +365,7 @@ func createTfList(ctx context.Context, assignments []ComputedAssignment) (*baset
 	slices.SortFunc(assignments, func(a, b ComputedAssignment) int {
 		return strings.Compare(a.Name, b.Name)
 	})
+
 	computedUsersList, diags := types.ListValueFrom(ctx, computedAssignmentType, assignments)
 	if diags != nil {
 		return nil, diags
