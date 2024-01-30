@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/yunarta/terraform-atlassian-api-client/bitbucket"
+	"github.com/yunarta/terraform-provider-commons/util"
 )
 
 type ProjectModel struct {
@@ -38,7 +39,7 @@ func NewProjectModel(plan ProjectModel, project *bitbucket.Project, assignmentRe
 		ID:                types.Int64Value(project.ID),
 		Key:               types.StringValue(project.Key),
 		Name:              types.StringValue(project.Name),
-		Description:       types.StringValue(project.Description),
+		Description:       util.NullString(project.Description),
 		AssignmentVersion: plan.AssignmentVersion,
 		Assignments:       plan.Assignments,
 		ComputedUsers:     assignmentResult.ComputedUsers,
