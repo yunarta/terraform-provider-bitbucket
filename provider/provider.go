@@ -41,6 +41,16 @@ func (p *BitbucketProvider) Schema(ctx context.Context, request provider.SchemaR
 					},
 				},
 			},
+			"author": schema.SingleNestedBlock{
+				Attributes: map[string]schema.Attribute{
+					"name": schema.StringAttribute{
+						Required: true,
+					},
+					"email": schema.StringAttribute{
+						Required: true,
+					},
+				},
+			},
 		},
 	}
 }

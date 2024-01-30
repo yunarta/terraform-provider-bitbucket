@@ -17,6 +17,7 @@ type RepositoryModel struct {
 	Name           types.String `tfsdk:"name"`
 	Description    types.String `tfsdk:"description"`
 	Readme         types.String `tfsdk:"readme"`
+	Path           types.String `tfsdk:"path"`
 
 	AssignmentVersion types.String `tfsdk:"assignment_version"`
 	Assignments       types.List   `tfsdk:"assignments"`
@@ -46,6 +47,7 @@ func NewRepositoryModel(repository *bitbucket.Repository, plan RepositoryModel, 
 		Project:           types.StringValue(repository.Project.Key),
 		RetainOnDelete:    plan.RetainOnDelete,
 		Readme:            plan.Readme,
+		Path:              plan.Path,
 		AssignmentVersion: plan.AssignmentVersion,
 		Assignments:       plan.Assignments,
 		ComputedUsers:     assignmentResult.ComputedUsers,

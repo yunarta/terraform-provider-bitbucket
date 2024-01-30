@@ -2,6 +2,13 @@ package provider
 
 import (
 	"context"
+	"fmt"
+	"github.com/go-git/go-billy/v5/memfs"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
+	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
+	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -14,9 +21,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/yunarta/terraform-atlassian-api-client/bitbucket"
 	"github.com/yunarta/terraform-provider-commons/util"
+	"io"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var (
@@ -70,7 +81,7 @@ func (receiver *RepositoryResource) Schema(ctx context.Context, request resource
 				},
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
-						regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9\-\s_\.]*$`),
+						regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9\-\s_.]*$`),
 						"must start with a letter or number and may contain spaces, hyphens, underscores, and periods",
 					),
 				},
@@ -87,6 +98,12 @@ func (receiver *RepositoryResource) Schema(ctx context.Context, request resource
 				},
 			},
 			"readme": schema.StringAttribute{
+				Optional: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"path": schema.StringAttribute{
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -140,6 +157,96 @@ func (receiver *RepositoryResource) Create(ctx context.Context, request resource
 			plan.Name.ValueString(),
 			plan.Readme.ValueString(),
 		)
+		if util.TestError(&response.Diagnostics, err, errorFailedToInitializeRepository) {
+			return
+		}
+	} else if !plan.Path.IsNull() {
+		// plan.Project need top be lower case
+
+		repo, err := git.Init(memory.NewStorage(), memfs.New())
+		if util.TestError(&response.Diagnostics, err, errorFailedToInitializeRepository) {
+			return
+		}
+
+		worktree, err := repo.Worktree()
+
+		// copy filesystem to worktree recursively
+		err = filepath.Walk(plan.Path.ValueString(), func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if info.IsDir() {
+				return nil // skip directories
+			}
+
+			srcFile, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			defer srcFile.Close()
+
+			relativePath, err := filepath.Rel(plan.Path.ValueString(), path)
+			if err != nil {
+				return err
+			}
+
+			destPath := filepath.Join(worktree.Filesystem.Root(), relativePath)
+			destFile, err := worktree.Filesystem.Create(destPath)
+			if err != nil {
+				return err
+			}
+
+			_, err = io.Copy(destFile, srcFile)
+			if err != nil {
+				return err
+			}
+
+			return destFile.Close()
+		})
+
+		if util.TestError(&response.Diagnostics, err, errorFailedToInitializeRepository) {
+			return
+		}
+
+		_, err = worktree.Add(".")
+		if util.TestError(&response.Diagnostics, err, errorFailedToInitializeRepository) {
+			return
+		}
+
+		_, err = worktree.Commit("Initial Commit", &git.CommitOptions{
+			Author: &object.Signature{
+				Name:  receiver.config.Author.Name.ValueString(),
+				Email: receiver.config.Author.Email.ValueString(),
+				When:  time.Now(),
+			},
+		})
+		if util.TestError(&response.Diagnostics, err, errorFailedToInitializeRepository) {
+			return
+		}
+
+		_, err = repo.CreateRemote(&config.RemoteConfig{
+			Name: "origin",
+			URLs: []string{
+				fmt.Sprintf("%s/scm/%s/%s.git",
+					receiver.config.Bitbucket.EndPoint.ValueString(),
+					strings.ToLower(plan.Project.ValueString()),
+					repository.Slug),
+			}, // replace with your remote repo URL
+		})
+		if util.TestError(&response.Diagnostics, err, errorFailedToInitializeRepository) {
+			return
+		}
+
+		err = repo.Push(&git.PushOptions{
+			Auth: &http.BasicAuth{
+				Username: receiver.config.Bitbucket.Username.ValueString(),
+				Password: receiver.config.Bitbucket.Password.ValueString(),
+			},
+			//RefSpecs: []config.RefSpec{
+			//	"refs/heads/master:refs/heads/master",
+			//},
+		})
 		if util.TestError(&response.Diagnostics, err, errorFailedToInitializeRepository) {
 			return
 		}
