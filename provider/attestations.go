@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/yunarta/terraform-atlassian-api-client/bitbucket"
 	"github.com/yunarta/terraform-provider-commons/util"
+	"sort"
 )
 
 func CreateAttestation(ctx context.Context, permissions *bitbucket.ObjectPermission, diagnostics *diag.Diagnostics) (basetypes.MapValue, basetypes.MapValue, diag.Diagnostics) {
@@ -31,6 +32,14 @@ func CreateAttestation(ctx context.Context, permissions *bitbucket.ObjectPermiss
 
 		groupInPermission = append(groupInPermission, group.Owner.Name)
 		groupPermissionsMap[group.Permission] = groupInPermission
+	}
+
+	for _, groups := range groupPermissionsMap {
+		sort.Strings(groups)
+	}
+
+	for _, users := range userPermissionsMap {
+		sort.Strings(users)
 	}
 
 	users, diags := types.MapValueFrom(ctx, types.ListType{
