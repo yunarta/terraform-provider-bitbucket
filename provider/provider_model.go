@@ -12,8 +12,14 @@ type EndPoint struct {
 	Token    types.String `tfsdk:"token"`
 }
 
+type Author struct {
+	Name  types.String `tfsdk:"name"`
+	Email types.String `tfsdk:"email"`
+}
+
 type BitbucketProviderConfig struct {
 	Bitbucket EndPoint `tfsdk:"bitbucket"`
+	Author    Author   `tfsdk:"author"`
 }
 
 type BitbucketProviderData struct {
