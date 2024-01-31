@@ -10,15 +10,15 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-validators v0.12.0
 	github.com/yunarta/golang-quality-of-life-pack v1.0.0
 	github.com/yunarta/terraform-api-transport v1.0.0
-	github.com/yunarta/terraform-atlassian-api-client v1.3.3
-	github.com/yunarta/terraform-provider-commons v1.0.0
+	github.com/yunarta/terraform-atlassian-api-client v1.3.5
+	github.com/yunarta/terraform-provider-commons v1.0.1
 )
 
 require (
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20230828082145-3c4c8a2d2371 // indirect
-	github.com/cloudflare/circl v1.3.3 // indirect
+	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
@@ -50,7 +50,7 @@ require (
 	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.13.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240108191215-35c7eff3a6b1 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240125205218-1f4bbc51befe // indirect
 	google.golang.org/grpc v1.60.1 // indirect
 	google.golang.org/protobuf v1.32.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
