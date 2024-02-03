@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/yunarta/terraform-atlassian-api-client/bitbucket"
-	"github.com/yunarta/terraform-provider-commons/util"
 )
 
 type RepositoryModel struct {
@@ -42,9 +41,9 @@ func NewRepositoryModel(repository *bitbucket.Repository, plan RepositoryModel, 
 	return &RepositoryModel{
 		ID:                types.StringValue(fmt.Sprintf("%v", repository.ID)),
 		Slug:              types.StringValue(repository.Slug),
-		Name:              types.StringValue(repository.Name),
-		Description:       util.NullString(repository.Description),
-		Project:           types.StringValue(repository.Project.Key),
+		Name:              plan.Name,
+		Description:       plan.Description,
+		Project:           plan.Project,
 		RetainOnDelete:    plan.RetainOnDelete,
 		Readme:            plan.Readme,
 		Path:              plan.Path,

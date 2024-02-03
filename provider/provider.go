@@ -121,8 +121,10 @@ func (p *BitbucketProvider) Resources(ctx context.Context) []func() resource.Res
 	return []func() resource.Resource{
 		NewRepositoryResource,
 		NewRepositoryPermissionsResource,
+		NewProjectBranchRestrictionsResource,
 		NewProjectResource,
 		NewProjectPermissionsResource,
+		NewRepositoryBranchRestrictionsResource,
 	}
 }
 
