@@ -11,9 +11,9 @@ import (
 )
 
 type ProjectPermissionsData struct {
-	Key    types.String `tfsdk:"key"`
-	Users  types.Map    `tfsdk:"users"`
-	Groups types.Map    `tfsdk:"groups"`
+	Key    string              `tfsdk:"key"`
+	Users  map[string][]string `tfsdk:"users"`
+	Groups map[string][]string `tfsdk:"groups"`
 }
 
 var (
@@ -77,17 +77,17 @@ func (receiver *ProjectPermissionsDataSource) Read(ctx context.Context, request 
 		return
 	}
 
-	permissions, err := receiver.client.ProjectService().ReadPermissions(config.Key.ValueString())
+	permissions, err := receiver.client.ProjectService().ReadPermissions(config.Key)
 	if util.TestError(&response.Diagnostics, err, "") {
 		return
 	}
 
 	if permissions == nil {
-		response.Diagnostics.AddError("Unable to find deployment", config.Key.ValueString())
+		response.Diagnostics.AddError("Unable to find deployment", config.Key)
 		return
 	}
 
-	users, groups, diags := CreateAttestation(ctx, permissions, &response.Diagnostics)
+	users, groups := CreateAttestation(permissions, []string{"PROJECT_ADMIN", "REPO_CREATE", "PROJECT_READ", "PROJECT_WRITE"})
 	if util.TestDiagnostic(&response.Diagnostics, diags) {
 		return
 	}

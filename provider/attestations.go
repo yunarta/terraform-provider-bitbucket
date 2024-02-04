@@ -1,18 +1,18 @@
 package provider
 
 import (
-	"context"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/yunarta/terraform-atlassian-api-client/bitbucket"
-	"github.com/yunarta/terraform-provider-commons/util"
 	"sort"
 )
 
-func CreateAttestation(ctx context.Context, permissions *bitbucket.ObjectPermission, diagnostics *diag.Diagnostics) (basetypes.MapValue, basetypes.MapValue, diag.Diagnostics) {
+func CreateAttestation(permissions *bitbucket.ObjectPermission, availablePermissions []string) (map[string][]string, map[string][]string) {
 	var userPermissionsMap = make(map[string][]string)
 	var groupPermissionsMap = make(map[string][]string)
+	for _, permission := range availablePermissions {
+		userPermissionsMap[permission] = []string{}
+		groupPermissionsMap[permission] = []string{}
+	}
+
 	for _, user := range permissions.Users {
 		userInPermission, ok := userPermissionsMap[user.Permission]
 		if !ok {
@@ -42,19 +42,5 @@ func CreateAttestation(ctx context.Context, permissions *bitbucket.ObjectPermiss
 		sort.Strings(users)
 	}
 
-	users, diags := types.MapValueFrom(ctx, types.ListType{
-		ElemType: types.StringType,
-	}, userPermissionsMap)
-	if util.TestDiagnostic(diagnostics, diags) {
-		return basetypes.MapValue{}, basetypes.MapValue{}, diags
-	}
-
-	groups, diags := types.MapValueFrom(ctx, types.ListType{
-		ElemType: types.StringType,
-	}, groupPermissionsMap)
-	if util.TestDiagnostic(diagnostics, diags) {
-		return basetypes.MapValue{}, basetypes.MapValue{}, diags
-	}
-
-	return users, groups, nil
+	return userPermissionsMap, userPermissionsMap
 }

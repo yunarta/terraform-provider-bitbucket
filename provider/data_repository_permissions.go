@@ -11,10 +11,10 @@ import (
 )
 
 type RepositoryPermissionsData struct {
-	Key    types.String `tfsdk:"key"`
-	Slug   types.String `tfsdk:"slug"`
-	Users  types.Map    `tfsdk:"users"`
-	Groups types.Map    `tfsdk:"groups"`
+	Key    string              `tfsdk:"key"`
+	Slug   string              `tfsdk:"slug"`
+	Users  map[string][]string `tfsdk:"users"`
+	Groups map[string][]string `tfsdk:"groups"`
 }
 
 var (
@@ -81,17 +81,17 @@ func (receiver *RepositoryPermissionsDataSource) Read(ctx context.Context, reque
 		return
 	}
 
-	permissions, err := receiver.client.RepositoryService().ReadPermissions(config.Key.ValueString(), config.Slug.ValueString())
+	permissions, err := receiver.client.RepositoryService().ReadPermissions(config.Key, config.Slug)
 	if util.TestError(&response.Diagnostics, err, "") {
 		return
 	}
 
 	if permissions == nil {
-		response.Diagnostics.AddError("Unable to find deployment", config.Key.ValueString())
+		response.Diagnostics.AddError("Unable to find deployment", config.Key)
 		return
 	}
 
-	users, groups, diags := CreateAttestation(ctx, permissions, &response.Diagnostics)
+	users, groups := CreateAttestation(permissions, []string{"REPO_ADMIN", "REPO_READ", "REPO_WRITE"})
 	if util.TestDiagnostic(&response.Diagnostics, diags) {
 		return
 	}
