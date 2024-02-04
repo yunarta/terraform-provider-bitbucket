@@ -92,7 +92,7 @@ func (receiver *RepositoryBranchRestrictionsResource) Configure(ctx context.Cont
 func (receiver *RepositoryBranchRestrictionsResource) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
 	var (
 		diags diag.Diagnostics
-		plan  RepositoryBranchRestrictionModel
+		plan  RepositoryBranchRestrictionsModel
 		err   error
 	)
 
@@ -145,7 +145,7 @@ func (receiver *RepositoryBranchRestrictionsResource) Read(ctx context.Context, 
 	var (
 		diags diag.Diagnostics
 
-		state RepositoryBranchRestrictionModel
+		state RepositoryBranchRestrictionsModel
 	)
 
 	diags = request.State.Get(ctx, &state)
@@ -180,7 +180,7 @@ func (receiver *RepositoryBranchRestrictionsResource) Read(ctx context.Context, 
 func (receiver *RepositoryBranchRestrictionsResource) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
 	var (
 		diags       diag.Diagnostics
-		plan, state RepositoryBranchRestrictionModel
+		plan, state RepositoryBranchRestrictionsModel
 	)
 
 	diags = request.Plan.Get(ctx, &plan)
@@ -262,7 +262,7 @@ func (receiver *RepositoryBranchRestrictionsResource) Delete(ctx context.Context
 	var (
 		diags diag.Diagnostics
 
-		state RepositoryBranchRestrictionModel
+		state RepositoryBranchRestrictionsModel
 	)
 
 	diags = request.State.Get(ctx, &state)
