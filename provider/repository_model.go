@@ -3,24 +3,22 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/yunarta/terraform-atlassian-api-client/bitbucket"
-	"github.com/yunarta/terraform-provider-commons/util"
 )
 
 type RepositoryModel struct {
 	ID             types.String `tfsdk:"id"`
-	RetainOnDelete types.Bool   `tfsdk:"retain_on_delete"`
-	Project        types.String `tfsdk:"project"`
+	RetainOnDelete bool         `tfsdk:"retain_on_delete"`
+	Project        string       `tfsdk:"project"`
 	Slug           types.String `tfsdk:"slug"`
-	Name           types.String `tfsdk:"name"`
-	Description    types.String `tfsdk:"description"`
+	Name           string       `tfsdk:"name"`
+	Description    string       `tfsdk:"description"`
 	Readme         types.String `tfsdk:"readme"`
 	Path           types.String `tfsdk:"path"`
 
 	AssignmentVersion types.String `tfsdk:"assignment_version"`
-	Assignments       types.List   `tfsdk:"assignments"`
+	Assignments       Assignments  `tfsdk:"assignments"`
 	ComputedUsers     types.List   `tfsdk:"computed_users"`
 	ComputedGroups    types.List   `tfsdk:"computed_groups"`
 }
@@ -28,23 +26,20 @@ type RepositoryModel struct {
 var _ RepositoryPermissionInterface = &RepositoryModel{}
 
 func (m RepositoryModel) getProjectKeyAndSlug(ctx context.Context) (projectKey string, slug string) {
-	return m.Project.ValueString(), m.Slug.ValueString()
+	return m.Project, m.Slug.ValueString()
 }
 
-func (m RepositoryModel) getAssignment(ctx context.Context) (Assignments, diag.Diagnostics) {
-	var assignments Assignments = make([]Assignment, 0)
-
-	diags := m.Assignments.ElementsAs(ctx, &assignments, true)
-	return assignments, diags
+func (m RepositoryModel) getAssignment(ctx context.Context) Assignments {
+	return m.Assignments
 }
 
 func NewRepositoryModel(repository *bitbucket.Repository, plan RepositoryModel, assignmentResult *AssignmentResult) *RepositoryModel {
 	return &RepositoryModel{
 		ID:                types.StringValue(fmt.Sprintf("%v", repository.ID)),
 		Slug:              types.StringValue(repository.Slug),
-		Name:              types.StringValue(repository.Name),
-		Description:       util.NullString(repository.Description),
-		Project:           types.StringValue(repository.Project.Key),
+		Name:              plan.Name,
+		Description:       plan.Description,
+		Project:           plan.Project,
 		RetainOnDelete:    plan.RetainOnDelete,
 		Readme:            plan.Readme,
 		Path:              plan.Path,

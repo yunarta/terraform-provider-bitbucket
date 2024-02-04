@@ -10,7 +10,7 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-validators v0.12.0
 	github.com/yunarta/golang-quality-of-life-pack v1.0.0
 	github.com/yunarta/terraform-api-transport v1.0.0
-	github.com/yunarta/terraform-atlassian-api-client v1.3.0
+	github.com/yunarta/terraform-atlassian-api-client v1.3.7
 	github.com/yunarta/terraform-provider-commons v1.0.1
 )
 

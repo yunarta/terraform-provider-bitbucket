@@ -95,9 +95,9 @@ func (receiver *ProjectResource) Create(ctx context.Context, request resource.Cr
 	}
 
 	project, err := receiver.client.ProjectService().Create(bitbucket.CreateProject{
-		Key:         plan.Key.ValueString(),
-		Name:        plan.Name.ValueString(),
-		Description: plan.Description.ValueString(),
+		Key:         plan.Key,
+		Name:        plan.Name,
+		Description: plan.Description,
 	})
 	if util.TestError(&response.Diagnostics, err, "Failed to create project") {
 		return
@@ -135,7 +135,7 @@ func (receiver *ProjectResource) Read(ctx context.Context, request resource.Read
 		return
 	}
 
-	project, err := receiver.client.ProjectService().Read(state.Key.ValueString())
+	project, err := receiver.client.ProjectService().Read(state.Key)
 	if util.TestError(&response.Diagnostics, err, "Failed to create project") {
 		return
 	}
@@ -169,9 +169,9 @@ func (receiver *ProjectResource) Update(ctx context.Context, request resource.Up
 		return
 	}
 
-	project, err := receiver.client.ProjectService().Update(plan.Key.ValueString(), bitbucket.ProjectUpdate{
-		Name:        plan.Name.ValueString(),
-		Description: plan.Description.ValueString(),
+	project, err := receiver.client.ProjectService().Update(plan.Key, bitbucket.ProjectUpdate{
+		Name:        plan.Name,
+		Description: plan.Description,
 	})
 
 	if util.TestError(&response.Diagnostics, err, "Failed to update project") {
@@ -204,7 +204,7 @@ func (receiver *ProjectResource) Delete(ctx context.Context, request resource.De
 	}
 
 	if !state.RetainOnDelete.ValueBool() {
-		err := receiver.client.ProjectService().Delete(state.Key.ValueString())
+		err := receiver.client.ProjectService().Delete(state.Key)
 		if util.TestError(&response.Diagnostics, err, "Failed to delete project") {
 			return
 		}
@@ -215,8 +215,8 @@ func (receiver *ProjectResource) Delete(ctx context.Context, request resource.De
 
 func (receiver *ProjectResource) ImportState(ctx context.Context, request resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	diags := response.State.Set(ctx, &ProjectModel{
-		Key:            types.StringValue(request.ID),
-		Assignments:    types.ListNull(assignmentType),
+		Key:            request.ID,
+		Assignments:    nil,
 		ComputedUsers:  types.ListNull(computedAssignmentType),
 		ComputedGroups: types.ListNull(computedAssignmentType),
 	})

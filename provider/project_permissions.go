@@ -11,15 +11,12 @@ type ProjectPermissionsReceiver interface {
 }
 
 type ProjectPermissionInterface interface {
-	getAssignment(ctx context.Context) (Assignments, diag.Diagnostics)
+	getAssignment(ctx context.Context) Assignments
 	getProjectKey(ctx context.Context) string
 }
 
 func CreateProjectAssignments(ctx context.Context, receiver ProjectPermissionsReceiver, plan ProjectPermissionInterface) (*AssignmentResult, diag.Diagnostics) {
-	assignments, diags := plan.getAssignment(ctx)
-	if diags != nil {
-		return nil, diags
-	}
+	assignments := plan.getAssignment(ctx)
 
 	assignmentOrder, diags := assignments.CreateAssignmentOrder(ctx)
 	if diags != nil {
@@ -39,10 +36,7 @@ func CreateProjectAssignments(ctx context.Context, receiver ProjectPermissionsRe
 }
 
 func ComputeProjectAssignments(ctx context.Context, receiver ProjectPermissionsReceiver, state ProjectPermissionInterface) (*AssignmentResult, diag.Diagnostics) {
-	assignments, diags := state.getAssignment(ctx)
-	if diags != nil {
-		return nil, diags
-	}
+	assignments := state.getAssignment(ctx)
 
 	assignmentOrder, diags := assignments.CreateAssignmentOrder(ctx)
 	if diags != nil {
@@ -63,15 +57,9 @@ func UpdateProjectAssignments(ctx context.Context, receiver ProjectPermissionsRe
 	state ProjectPermissionInterface,
 	forceUpdate bool) (*AssignmentResult, diag.Diagnostics) {
 
-	plannedAssignments, diags := plan.getAssignment(ctx)
-	if diags != nil {
-		return nil, diags
-	}
+	plannedAssignments := plan.getAssignment(ctx)
 
-	inStateAssignments, diags := state.getAssignment(ctx)
-	if diags != nil {
-		return nil, diags
-	}
+	inStateAssignments := state.getAssignment(ctx)
 
 	plannedAssignmentOrder, diags := plannedAssignments.CreateAssignmentOrder(ctx)
 	if diags != nil {
@@ -99,10 +87,7 @@ func UpdateProjectAssignments(ctx context.Context, receiver ProjectPermissionsRe
 }
 
 func DeleteProjectAssignments(ctx context.Context, receiver ProjectPermissionsReceiver, state ProjectPermissionInterface) diag.Diagnostics {
-	assignments, diags := state.getAssignment(ctx)
-	if diags != nil {
-		return diags
-	}
+	assignments := state.getAssignment(ctx)
 
 	assignmentOrder, diags := assignments.CreateAssignmentOrder(ctx)
 	if diags != nil {
