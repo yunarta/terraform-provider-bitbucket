@@ -2,15 +2,14 @@ package provider
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 type ProjectPermissionsModel struct {
-	RetainOnDelete    types.Bool   `tfsdk:"retain_on_delete"`
-	Key               types.String `tfsdk:"key"`
+	RetainOnDelete    bool         `tfsdk:"retain_on_delete"`
+	Key               string       `tfsdk:"key"`
 	AssignmentVersion types.String `tfsdk:"assignment_version"`
-	Assignments       types.List   `tfsdk:"assignments"`
+	Assignments       Assignments  `tfsdk:"assignments"`
 	ComputedUsers     types.List   `tfsdk:"computed_users"`
 	ComputedGroups    types.List   `tfsdk:"computed_groups"`
 }
@@ -18,14 +17,11 @@ type ProjectPermissionsModel struct {
 var _ ProjectPermissionInterface = &ProjectPermissionsModel{}
 
 func (m ProjectPermissionsModel) getProjectKey(ctx context.Context) string {
-	return m.Key.ValueString()
+	return m.Key
 }
 
-func (m ProjectPermissionsModel) getAssignment(ctx context.Context) (Assignments, diag.Diagnostics) {
-	var assignments Assignments = make([]Assignment, 0)
-
-	diags := m.Assignments.ElementsAs(ctx, &assignments, true)
-	return assignments, diags
+func (m ProjectPermissionsModel) getAssignment(ctx context.Context) Assignments {
+	return m.Assignments
 }
 
 func NewProjectPermissionsModel(plan ProjectPermissionsModel, assignmentResult *AssignmentResult) *ProjectPermissionsModel {

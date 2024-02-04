@@ -100,7 +100,7 @@ func (p *BitbucketProvider) Configure(ctx context.Context, request provider.Conf
 	providerData := &BitbucketProviderData{
 		config: config,
 		client: bitbucket.NewBitbucketClient(
-			transport.NewHttpPayloadTransport(config.Bitbucket.EndPoint.ValueString(),
+			transport.NewHttpPayloadTransport(config.Bitbucket.EndPoint,
 				authentication,
 			),
 		),

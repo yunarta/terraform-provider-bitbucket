@@ -136,9 +136,9 @@ func (receiver *RepositoryResource) Create(ctx context.Context, request resource
 		return
 	}
 
-	repository, err := receiver.client.RepositoryService().Create(plan.Project.ValueString(), bitbucket.CreateRepo{
-		Name:        plan.Name.ValueString(),
-		Description: plan.Description.ValueString(),
+	repository, err := receiver.client.RepositoryService().Create(plan.Project, bitbucket.CreateRepo{
+		Name:        plan.Name,
+		Description: plan.Description,
 	})
 	if util.TestError(&response.Diagnostics, err, errorFailedToCreateRepository) {
 		return
@@ -153,8 +153,8 @@ func (receiver *RepositoryResource) Create(ctx context.Context, request resource
 
 	if !plan.Readme.IsNull() {
 		_, err = receiver.client.RepositoryService().Initialize(
-			plan.Project.ValueString(),
-			plan.Name.ValueString(),
+			plan.Project,
+			plan.Name,
 			plan.Readme.ValueString(),
 		)
 		if util.TestError(&response.Diagnostics, err, errorFailedToInitializeRepository) {
@@ -216,8 +216,8 @@ func (receiver *RepositoryResource) Create(ctx context.Context, request resource
 
 		_, err = worktree.Commit("Initial Commit", &git.CommitOptions{
 			Author: &object.Signature{
-				Name:  receiver.config.Author.Name.ValueString(),
-				Email: receiver.config.Author.Email.ValueString(),
+				Name:  receiver.config.Author.Name,
+				Email: receiver.config.Author.Email,
 				When:  time.Now(),
 			},
 		})
@@ -229,8 +229,8 @@ func (receiver *RepositoryResource) Create(ctx context.Context, request resource
 			Name: "origin",
 			URLs: []string{
 				fmt.Sprintf("%s/scm/%s/%s.git",
-					receiver.config.Bitbucket.EndPoint.ValueString(),
-					strings.ToLower(plan.Project.ValueString()),
+					receiver.config.Bitbucket.EndPoint,
+					strings.ToLower(plan.Project),
 					repository.Slug),
 			}, // replace with your remote repo URL
 		})
@@ -278,7 +278,7 @@ func (receiver *RepositoryResource) Read(ctx context.Context, request resource.R
 		return
 	}
 
-	repository, err := receiver.client.RepositoryService().Read(state.Project.ValueString(), state.Slug.ValueString())
+	repository, err := receiver.client.RepositoryService().Read(state.Project, state.Slug.ValueString())
 	if util.TestError(&response.Diagnostics, err, errorFailedToCreateRepository) {
 		return
 	}
@@ -311,9 +311,9 @@ func (receiver *RepositoryResource) Update(ctx context.Context, request resource
 	}
 
 	repository, err := receiver.client.RepositoryService().Update(
-		state.Project.ValueString(),
+		state.Project,
 		state.Slug.ValueString(),
-		plan.Description.ValueString(),
+		plan.Description,
 	)
 	if util.TestError(&response.Diagnostics, err, errorFailedToUpdateRepository) {
 		return
@@ -346,14 +346,14 @@ func (receiver *RepositoryResource) Delete(ctx context.Context, request resource
 		return
 	}
 
-	if !state.RetainOnDelete.ValueBool() {
+	if !state.RetainOnDelete {
 		diags = DeleteRepositoryAssignments(ctx, receiver, state)
 		if util.TestDiagnostic(&response.Diagnostics, diags) {
 			return
 		}
 
 		err = receiver.client.RepositoryService().Delete(
-			state.Project.ValueString(),
+			state.Project,
 			state.Slug.ValueString(),
 		)
 		if util.TestError(&response.Diagnostics, err, errorFailedToDeleteRepository) {
@@ -367,9 +367,9 @@ func (receiver *RepositoryResource) Delete(ctx context.Context, request resource
 func (receiver *RepositoryResource) ImportState(ctx context.Context, request resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	slug := strings.Split(request.ID, "/")
 	diags := response.State.Set(ctx, &RepositoryModel{
-		Project:        types.StringValue(slug[0]),
+		Project:        slug[0],
 		Slug:           types.StringValue(slug[1]),
-		Assignments:    types.ListNull(assignmentType),
+		Assignments:    nil,
 		ComputedUsers:  types.ListNull(computedAssignmentType),
 		ComputedGroups: types.ListNull(computedAssignmentType),
 	})
