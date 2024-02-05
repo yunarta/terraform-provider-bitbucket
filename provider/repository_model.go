@@ -3,22 +3,23 @@ package provider
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/yunarta/terraform-atlassian-api-client/bitbucket"
 )
 
 type RepositoryModel struct {
 	ID             types.String `tfsdk:"id"`
-	RetainOnDelete bool         `tfsdk:"retain_on_delete"`
-	Project        string       `tfsdk:"project"`
+	RetainOnDelete types.Bool   `tfsdk:"retain_on_delete"`
+	Project        types.String `tfsdk:"project"`
 	Slug           types.String `tfsdk:"slug"`
-	Name           string       `tfsdk:"name"`
+	Name           types.String `tfsdk:"name"`
 	Description    types.String `tfsdk:"description"`
 	Readme         types.String `tfsdk:"readme"`
 	Path           types.String `tfsdk:"path"`
 
 	AssignmentVersion types.String `tfsdk:"assignment_version"`
-	Assignments       Assignments  `tfsdk:"assignments"`
+	Assignments       types.List   `tfsdk:"assignments"`
 	ComputedUsers     types.List   `tfsdk:"computed_users"`
 	ComputedGroups    types.List   `tfsdk:"computed_groups"`
 }
@@ -26,11 +27,14 @@ type RepositoryModel struct {
 var _ RepositoryPermissionInterface = &RepositoryModel{}
 
 func (m RepositoryModel) getProjectKeyAndSlug(ctx context.Context) (projectKey string, slug string) {
-	return m.Project, m.Slug.ValueString()
+	return m.Project.ValueString(), m.Slug.ValueString()
 }
 
-func (m RepositoryModel) getAssignment(ctx context.Context) Assignments {
-	return m.Assignments
+func (m RepositoryModel) getAssignment(ctx context.Context) (Assignments, diag.Diagnostics) {
+	var assignments Assignments = make([]Assignment, 0)
+
+	diags := m.Assignments.ElementsAs(ctx, &assignments, true)
+	return assignments, diags
 }
 
 func NewRepositoryModel(repository *bitbucket.Repository, plan RepositoryModel, assignmentResult *AssignmentResult) *RepositoryModel {

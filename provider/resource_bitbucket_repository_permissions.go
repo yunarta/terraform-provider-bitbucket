@@ -163,7 +163,7 @@ func (receiver *RepositoryPermissionsResource) Delete(ctx context.Context, reque
 		return
 	}
 
-	if !state.RetainOnDelete {
+	if !state.RetainOnDelete.ValueBool() {
 		diags = DeleteRepositoryAssignments(ctx, receiver, state)
 		if util.TestDiagnostic(&response.Diagnostics, diags) {
 			return
@@ -176,9 +176,9 @@ func (receiver *RepositoryPermissionsResource) Delete(ctx context.Context, reque
 func (receiver *RepositoryPermissionsResource) ImportState(ctx context.Context, request resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	slug := strings.Split(request.ID, "/")
 	diags := response.State.Set(ctx, &RepositoryModel{
-		Project:        slug[0],
+		Project:        types.StringValue(slug[0]),
 		Slug:           types.StringValue(slug[1]),
-		Assignments:    nil,
+		Assignments:    types.ListNull(assignmentType),
 		ComputedUsers:  types.ListNull(computedAssignmentType),
 		ComputedGroups: types.ListNull(computedAssignmentType),
 	})
