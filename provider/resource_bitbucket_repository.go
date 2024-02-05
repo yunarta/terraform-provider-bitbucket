@@ -138,7 +138,7 @@ func (receiver *RepositoryResource) Create(ctx context.Context, request resource
 
 	repository, err := receiver.client.RepositoryService().Create(plan.Project, bitbucket.CreateRepo{
 		Name:        plan.Name,
-		Description: plan.Description,
+		Description: plan.Description.ValueString(),
 	})
 	if util.TestError(&response.Diagnostics, err, errorFailedToCreateRepository) {
 		return
@@ -313,7 +313,7 @@ func (receiver *RepositoryResource) Update(ctx context.Context, request resource
 	repository, err := receiver.client.RepositoryService().Update(
 		state.Project,
 		state.Slug.ValueString(),
-		plan.Description,
+		plan.Description.ValueString(),
 	)
 	if util.TestError(&response.Diagnostics, err, errorFailedToUpdateRepository) {
 		return

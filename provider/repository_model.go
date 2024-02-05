@@ -13,7 +13,7 @@ type RepositoryModel struct {
 	Project        string       `tfsdk:"project"`
 	Slug           types.String `tfsdk:"slug"`
 	Name           string       `tfsdk:"name"`
-	Description    string       `tfsdk:"description"`
+	Description    types.String `tfsdk:"description"`
 	Readme         types.String `tfsdk:"readme"`
 	Path           types.String `tfsdk:"path"`
 

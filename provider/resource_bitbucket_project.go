@@ -97,7 +97,7 @@ func (receiver *ProjectResource) Create(ctx context.Context, request resource.Cr
 	project, err := receiver.client.ProjectService().Create(bitbucket.CreateProject{
 		Key:         plan.Key,
 		Name:        plan.Name,
-		Description: plan.Description,
+		Description: plan.Description.ValueString(),
 	})
 	if util.TestError(&response.Diagnostics, err, "Failed to create project") {
 		return
@@ -171,7 +171,7 @@ func (receiver *ProjectResource) Update(ctx context.Context, request resource.Up
 
 	project, err := receiver.client.ProjectService().Update(plan.Key, bitbucket.ProjectUpdate{
 		Name:        plan.Name,
-		Description: plan.Description,
+		Description: plan.Description.ValueString(),
 	})
 
 	if util.TestError(&response.Diagnostics, err, "Failed to update project") {
