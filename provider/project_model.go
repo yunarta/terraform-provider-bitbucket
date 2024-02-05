@@ -11,7 +11,7 @@ type ProjectModel struct {
 	ID                types.Int64  `tfsdk:"id"`
 	Key               string       `tfsdk:"key"`
 	Name              string       `tfsdk:"name"`
-	Description       string       `tfsdk:"description"`
+	Description       types.String `tfsdk:"description"`
 	AssignmentVersion types.String `tfsdk:"assignment_version"`
 	Assignments       Assignments  `tfsdk:"assignments"`
 	ComputedUsers     types.List   `tfsdk:"computed_users"`
