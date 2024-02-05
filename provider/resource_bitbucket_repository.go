@@ -7,11 +7,11 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -25,7 +25,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -144,13 +143,27 @@ func (receiver *RepositoryResource) Create(ctx context.Context, request resource
 		return
 	}
 
-	plan.Slug = types.StringValue(repository.Slug)
+	//plan.Slug = types.StringValue(repository.Slug)
+	//
+	//if util.TestDiagnostics(
+	//	&response.Diagnostics,
+	//	response.State.SetAttribute(ctx, path.Root("id"), types.StringValue(strconv.Itoa(repository.ID))),
+	//	response.State.SetAttribute(ctx, path.Root("project"), types.StringValue(repository.Project.Key)),
+	//	response.State.SetAttribute(ctx, path.Root("slug"), types.StringValue(repository.Slug)),
+	//	) {
+	//}
 
-	diags = response.State.SetAttribute(ctx, path.Root("id"), types.StringValue(strconv.Itoa(repository.ID)))
-	if util.TestError(&response.Diagnostics, err, errorFailedToUpdateState) {
+	computation, diags := CreateRepositoryAssignments(ctx, receiver, plan)
+	if util.TestDiagnostic(&response.Diagnostics, diags) {
 		return
 	}
 
+	repositoryModel := NewRepositoryModel(repository, plan, computation)
+
+	diags = response.State.Set(ctx, repositoryModel)
+	if util.TestDiagnostic(&response.Diagnostics, diags) {
+		return
+	}
 	if !plan.Readme.IsNull() {
 		_, err = receiver.client.RepositoryService().Initialize(
 			plan.Project.ValueString(),
@@ -238,11 +251,20 @@ func (receiver *RepositoryResource) Create(ctx context.Context, request resource
 			return
 		}
 
-		err = repo.Push(&git.PushOptions{
-			Auth: &http.BasicAuth{
+		var auth transport.AuthMethod
+		if receiver.config.Bitbucket.Token.IsNull() {
+			auth = &http.BasicAuth{
 				Username: receiver.config.Bitbucket.Username.ValueString(),
 				Password: receiver.config.Bitbucket.Password.ValueString(),
-			},
+			}
+		} else {
+			auth = &http.BasicAuth{
+				Username: receiver.config.Bitbucket.Username.ValueString(),
+				Password: receiver.config.Bitbucket.Token.ValueString(),
+			}
+		}
+		err = repo.Push(&git.PushOptions{
+			Auth: auth,
 			//RefSpecs: []config.RefSpec{
 			//	"refs/heads/master:refs/heads/master",
 			//},
@@ -252,17 +274,6 @@ func (receiver *RepositoryResource) Create(ctx context.Context, request resource
 		}
 	}
 
-	computation, diags := CreateRepositoryAssignments(ctx, receiver, plan)
-	if util.TestDiagnostic(&response.Diagnostics, diags) {
-		return
-	}
-
-	repositoryModel := NewRepositoryModel(repository, plan, computation)
-
-	diags = response.State.Set(ctx, repositoryModel)
-	if util.TestDiagnostic(&response.Diagnostics, diags) {
-		return
-	}
 }
 
 func (receiver *RepositoryResource) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {

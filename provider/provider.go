@@ -28,7 +28,7 @@ func (p *BitbucketProvider) Schema(ctx context.Context, request provider.SchemaR
 						Required: true,
 					},
 					"username": schema.StringAttribute{
-						Optional:  true,
+						Required:  true,
 						Sensitive: false,
 					},
 					"password": schema.StringAttribute{
@@ -67,10 +67,10 @@ func (p *BitbucketProvider) Configure(ctx context.Context, request provider.Conf
 	// Check if token is provided
 	if !config.Bitbucket.Token.IsNull() {
 		// If token is provided, username and password should not be set
-		if !config.Bitbucket.Username.IsNull() || !config.Bitbucket.Password.IsNull() {
+		if !config.Bitbucket.Password.IsNull() {
 			response.Diagnostics.AddError(
 				"Invalid Configuration",
-				"When 'token' is provided, 'username' and 'password' must not be set.",
+				"When 'token' is provided, 'password' must not be set.",
 			)
 			return
 		}
@@ -79,7 +79,7 @@ func (p *BitbucketProvider) Configure(ctx context.Context, request provider.Conf
 		if config.Bitbucket.Username.IsNull() || config.Bitbucket.Password.IsNull() {
 			response.Diagnostics.AddError(
 				"Invalid Configuration",
-				"Both 'username' and 'password' must be set when 'token' is not provided.",
+				"'password' must be set when 'token' is not provided.",
 			)
 			return
 		}
