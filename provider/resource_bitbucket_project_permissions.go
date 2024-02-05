@@ -163,7 +163,7 @@ func (receiver *ProjectPermissionsResource) Delete(ctx context.Context, request 
 		return
 	}
 
-	if !state.RetainOnDelete {
+	if !state.RetainOnDelete.ValueBool() {
 		diags = DeleteProjectAssignments(ctx, receiver, state)
 		if util.TestDiagnostic(&response.Diagnostics, diags) {
 			return
@@ -175,8 +175,8 @@ func (receiver *ProjectPermissionsResource) Delete(ctx context.Context, request 
 
 func (receiver *ProjectPermissionsResource) ImportState(ctx context.Context, request resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	diags := response.State.Set(ctx, &ProjectPermissionsModel{
-		Key:            request.ID,
-		Assignments:    nil,
+		Key:            types.StringValue(request.ID),
+		Assignments:    types.ListNull(assignmentType),
 		ComputedUsers:  types.ListNull(computedAssignmentType),
 		ComputedGroups: types.ListNull(computedAssignmentType),
 	})

@@ -6,15 +6,15 @@ import (
 )
 
 type EndPoint struct {
-	EndPoint string       `tfsdk:"endpoint"`
+	EndPoint types.String `tfsdk:"endpoint"`
 	Username types.String `tfsdk:"username"`
 	Password types.String `tfsdk:"password"`
 	Token    types.String `tfsdk:"token"`
 }
 
 type Author struct {
-	Name  string `tfsdk:"name"`
-	Email string `tfsdk:"email"`
+	Name  types.String `tfsdk:"name"`
+	Email types.String `tfsdk:"email"`
 }
 
 type BitbucketProviderConfig struct {

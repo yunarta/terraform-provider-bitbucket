@@ -2,18 +2,20 @@ package provider
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/yunarta/terraform-atlassian-api-client/bitbucket"
+	"github.com/yunarta/terraform-provider-commons/util"
 )
 
 type ProjectModel struct {
 	RetainOnDelete    types.Bool   `tfsdk:"retain_on_delete"`
 	ID                types.Int64  `tfsdk:"id"`
-	Key               string       `tfsdk:"key"`
-	Name              string       `tfsdk:"name"`
+	Key               types.String `tfsdk:"key"`
+	Name              types.String `tfsdk:"name"`
 	Description       types.String `tfsdk:"description"`
 	AssignmentVersion types.String `tfsdk:"assignment_version"`
-	Assignments       Assignments  `tfsdk:"assignments"`
+	Assignments       types.List   `tfsdk:"assignments"`
 	ComputedUsers     types.List   `tfsdk:"computed_users"`
 	ComputedGroups    types.List   `tfsdk:"computed_groups"`
 }
@@ -21,20 +23,23 @@ type ProjectModel struct {
 var _ ProjectPermissionInterface = &ProjectModel{}
 
 func (m ProjectModel) getProjectKey(ctx context.Context) string {
-	return m.Key
+	return m.Key.ValueString()
 }
 
-func (m ProjectModel) getAssignment(ctx context.Context) Assignments {
-	return m.Assignments
+func (m ProjectModel) getAssignment(ctx context.Context) (Assignments, diag.Diagnostics) {
+	var assignments Assignments = make([]Assignment, 0)
+
+	diags := m.Assignments.ElementsAs(ctx, &assignments, true)
+	return assignments, diags
 }
 
 func NewProjectModel(plan ProjectModel, project *bitbucket.Project, assignmentResult *AssignmentResult) *ProjectModel {
 	return &ProjectModel{
 		RetainOnDelete:    plan.RetainOnDelete,
 		ID:                types.Int64Value(project.ID),
-		Key:               plan.Key,
-		Name:              plan.Name,
-		Description:       plan.Description,
+		Key:               types.StringValue(project.Key),
+		Name:              types.StringValue(project.Name),
+		Description:       util.NullString(project.Description),
 		AssignmentVersion: plan.AssignmentVersion,
 		Assignments:       plan.Assignments,
 		ComputedUsers:     assignmentResult.ComputedUsers,

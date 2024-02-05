@@ -95,8 +95,8 @@ func (receiver *ProjectResource) Create(ctx context.Context, request resource.Cr
 	}
 
 	project, err := receiver.client.ProjectService().Create(bitbucket.CreateProject{
-		Key:         plan.Key,
-		Name:        plan.Name,
+		Key:         plan.Key.ValueString(),
+		Name:        plan.Name.ValueString(),
 		Description: plan.Description.ValueString(),
 	})
 	if util.TestError(&response.Diagnostics, err, "Failed to create project") {
@@ -135,7 +135,7 @@ func (receiver *ProjectResource) Read(ctx context.Context, request resource.Read
 		return
 	}
 
-	project, err := receiver.client.ProjectService().Read(state.Key)
+	project, err := receiver.client.ProjectService().Read(state.Key.ValueString())
 	if util.TestError(&response.Diagnostics, err, "Failed to create project") {
 		return
 	}
@@ -169,8 +169,8 @@ func (receiver *ProjectResource) Update(ctx context.Context, request resource.Up
 		return
 	}
 
-	project, err := receiver.client.ProjectService().Update(plan.Key, bitbucket.ProjectUpdate{
-		Name:        plan.Name,
+	project, err := receiver.client.ProjectService().Update(plan.Key.ValueString(), bitbucket.ProjectUpdate{
+		Name:        plan.Name.ValueString(),
 		Description: plan.Description.ValueString(),
 	})
 
@@ -204,7 +204,7 @@ func (receiver *ProjectResource) Delete(ctx context.Context, request resource.De
 	}
 
 	if !state.RetainOnDelete.ValueBool() {
-		err := receiver.client.ProjectService().Delete(state.Key)
+		err := receiver.client.ProjectService().Delete(state.Key.ValueString())
 		if util.TestError(&response.Diagnostics, err, "Failed to delete project") {
 			return
 		}
@@ -215,8 +215,8 @@ func (receiver *ProjectResource) Delete(ctx context.Context, request resource.De
 
 func (receiver *ProjectResource) ImportState(ctx context.Context, request resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	diags := response.State.Set(ctx, &ProjectModel{
-		Key:            request.ID,
-		Assignments:    nil,
+		Key:            types.StringValue(request.ID),
+		Assignments:    types.ListNull(assignmentType),
 		ComputedUsers:  types.ListNull(computedAssignmentType),
 		ComputedGroups: types.ListNull(computedAssignmentType),
 	})
