@@ -155,7 +155,7 @@ json bitbucket_repository_merge_checks {
 
 json data_bitbucket_project_permission {
     "key": "project key",
-    "users": {
+    "users (c)": {
         "permission_name": [
             "list of users"
         ],
@@ -163,7 +163,7 @@ json data_bitbucket_project_permission {
             "list of groups"
         ]
     },
-    "groups": {
+    "groups (c)": {
         "permission_name": [
             "list of groups"
         ],
@@ -176,7 +176,7 @@ json data_bitbucket_project_permission {
 json data_bitbucket_repository_permission {
     "key": "project key",
     "slug": "repository slug",
-    "users": {
+    "users (c)": {
         "permission_name": [
             "list of users"
         ],
@@ -184,7 +184,7 @@ json data_bitbucket_repository_permission {
             "list of groups"
         ]
     },
-    "groups": {
+    "groups (c)": {
         "permission_name": [
             "list of groups"
         ],
