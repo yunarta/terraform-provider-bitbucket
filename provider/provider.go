@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/yunarta/terraform-api-transport/transport"
 	"github.com/yunarta/terraform-atlassian-api-client/bitbucket"
+	"os"
+	"path/filepath"
 )
 
 type BitbucketProvider struct {
@@ -63,6 +65,8 @@ func (p *BitbucketProvider) Configure(ctx context.Context, request provider.Conf
 	if response.Diagnostics.HasError() {
 		return
 	}
+
+	_ = os.RemoveAll(filepath.Join(".cache"))
 
 	// Check if token is provided
 	if !config.Bitbucket.Token.IsNull() {

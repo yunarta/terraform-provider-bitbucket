@@ -1,0 +1,197 @@
+@startuml
+
+json bitbucket_project {
+    "id (c)": "project id",
+    "retain_on_delete": "retain project on deletion",
+    "key": "project key",
+    "name": "project name",
+    "description": "description",
+    "assignment_version": "arbitrary string to force assignment update",
+    "computed_users (c)": [
+        {
+        "name":"username",
+        "permission": "permission"
+        }
+    ],
+    "computed_groups (c)": [
+        {
+        "name":"username",
+        "permission": "permission"
+        }
+    ],
+    "assignments": [
+        {
+        "users": "list of user",
+        "groups": "list of groups",
+        "permission": "permission",
+        "priority": "priority"
+        }
+    ]
+}
+
+json bitbucket_project_permissions {
+    "retain_on_delete": "retain project on deletion",
+    "key": "project key",
+    "assignment_version": "arbitrary string to force assignment update",
+    "computed_users (c)": [
+        {
+        "name":"username",
+        "permission": "permission"
+        }
+    ],
+    "computed_groups (c)": [
+        {
+        "name":"username",
+        "permission": "permission"
+        }
+    ],
+    "assignments": [
+        {
+        "users": "list of user",
+        "groups": "list of groups",
+        "permission": "permission",
+        "priority": "priority"
+        }
+    ]
+}
+
+json bitbucket_project_branch_restriction {
+    "project": "project key",
+    "branch": "branch to restrict",
+    "restriction": {
+    "id (c)": "restriction id",
+        "type": "restriction type, ie read-only, pull-request-only",
+        "users": "list of user",
+        "groups": "list of groups"
+    }
+}
+
+json bitbucket_project_merge_checks {
+    "project": "project key",
+    "all_reviewer_approval": "require all reviewer approval",
+    "minimum_approvals": "require minimum approvals",
+    "minimum_successful_builds": "require minimum successful builds"
+}
+
+json bitbucket_repository {
+    "id (c)": "project id",
+    "retain_on_delete": "retain project on deletion",
+    "project": "project key",
+    "name": "repo name",
+    "slug (c)": "repo slug",
+    "description": "description",
+    "readme (o)": "when set will create readme file",
+    "path (o)": "when set will import path recursively as initial commit",
+    "assignment_version": "arbitrary string to force assignment update",
+    "computed_users (c)": [
+        {
+        "name":"username",
+        "permission": "permission"
+        }
+    ],
+    "computed_groups (c)": [
+        {
+        "name":"username",
+        "permission": "permission"
+        }
+    ],
+    "assignments": [
+        {
+        "users": "list of user",
+        "groups": "list of groups",
+        "permission": "permission",
+        "priority": "priority"
+        }
+    ]
+}
+
+
+json bitbucket_repository_permissions {
+    "retain_on_delete": "retain project on deletion",
+    "project": "project key",
+    "slug (c)": "repo slug",
+    "assignment_version": "arbitrary string to force assignment update",
+    "computed_users (c)": [
+        {
+        "name":"username",
+        "permission": "permission"
+        }
+    ],
+    "computed_groups (c)": [
+        {
+        "name":"username",
+        "permission": "permission"
+        }
+    ],
+    "assignments": [
+        {
+        "users": "list of user",
+        "groups": "list of groups",
+        "permission": "permission",
+        "priority": "priority"
+        }
+    ]
+}
+
+
+json bitbucket_repository_branch_restriction {
+    "project": "project key",
+    "repo": "repo slug",
+    "branch": "branch to restrict",
+    "restriction": {
+    "id (c)": "restriction id",
+        "type": "restriction type, ie read-only, pull-request-only",
+        "users": "list of user",
+        "groups": "list of groups"
+    }
+}
+
+json bitbucket_repository_merge_checks {
+    "project": "project key",
+    "all_reviewer_approval": "require all reviewer approval",
+    "minimum_approvals": "require minimum approvals",
+    "minimum_successful_builds": "require minimum successful builds"
+}
+
+json data_bitbucket_project_permission {
+    "key": "project key",
+    "users (c)": {
+        "permission_name": [
+            "list of users"
+        ],
+        "permission_name": [
+            "list of groups"
+        ]
+    },
+    "groups (c)": {
+        "permission_name": [
+            "list of groups"
+        ],
+        "permission_name": [
+            "list of groups"
+        ]
+    }
+}
+
+json data_bitbucket_repository_permission {
+    "key": "project key",
+    "slug": "repository slug",
+    "users (c)": {
+        "permission_name": [
+            "list of users"
+        ],
+        "permission_name": [
+            "list of groups"
+        ]
+    },
+    "groups (c)": {
+        "permission_name": [
+            "list of groups"
+        ],
+        "permission_name": [
+            "list of groups"
+        ]
+    }
+}
+
+@enduml
