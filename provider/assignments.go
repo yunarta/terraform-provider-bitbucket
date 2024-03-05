@@ -2,21 +2,19 @@ package provider
 
 import (
 	"context"
+	"slices"
+	"strings"
+
 	"github.com/emirpasic/gods/utils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/yunarta/golang-quality-of-life-pack/collections"
 	"github.com/yunarta/terraform-atlassian-api-client/bitbucket"
-	"slices"
-	"strings"
-)
-
-import (
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 )
 
 type Assignment struct {
@@ -46,7 +44,7 @@ func (assignments Assignments) CreateAssignmentOrder(ctx context.Context) (*Assi
 		makeAssignments[assignment.Priority] = assignment
 	}
 	slices.SortFunc(priorities, func(a, b int64) int {
-		return utils.Int64Comparator(a, b)
+		return -utils.Int64Comparator(a, b)
 	})
 
 	var usersAssignments = map[string]string{}
