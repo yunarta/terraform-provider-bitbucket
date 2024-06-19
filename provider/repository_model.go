@@ -41,7 +41,7 @@ func NewRepositoryModel(repository *bitbucket.Repository, plan RepositoryModel, 
 	return &RepositoryModel{
 		ID:                types.StringValue(fmt.Sprintf("%v", repository.ID)),
 		Slug:              types.StringValue(repository.Slug),
-		Name:              plan.Name,
+		Name:              types.StringValue(repository.Name),
 		Description:       plan.Description,
 		Project:           plan.Project,
 		RetainOnDelete:    plan.RetainOnDelete,
