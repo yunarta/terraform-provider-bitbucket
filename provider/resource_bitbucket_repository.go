@@ -78,7 +78,7 @@ func (receiver *RepositoryResource) Schema(ctx context.Context, request resource
 			"name": schema.StringAttribute{
 				Required: true,
 				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplaceIfConfigured(),
+					util.ReplaceIfStringDiff(),
 				},
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
@@ -95,7 +95,7 @@ func (receiver *RepositoryResource) Schema(ctx context.Context, request resource
 			"project": schema.StringAttribute{
 				Required: true,
 				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplaceIfConfigured(),
+					util.ReplaceIfStringDiff(),
 				},
 			},
 			"readme": schema.StringAttribute{
