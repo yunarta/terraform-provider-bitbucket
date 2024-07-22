@@ -120,8 +120,8 @@ github.com/yunarta/terraform-api-transport v1.0.1 h1:WzxCUGs8UJcCYB09ErLLXtu8NGz
 github.com/yunarta/terraform-api-transport v1.0.1/go.mod h1:sYdlgKir9SBUVv3GO/m5m7MtJ5o9FK/n4yRpQKmFvjM=
 github.com/yunarta/terraform-atlassian-api-client v1.3.13 h1:Qw62vzMKh6zyZvK6MChJ3bFLNtFUeth7QoPP+XNHsPU=
 github.com/yunarta/terraform-atlassian-api-client v1.3.13/go.mod h1:QOj00CmhhXF+6kb8RBxEULIBEaZe0Bv+xMFmFHCHUIA=
-github.com/yunarta/terraform-provider-commons v1.0.2 h1:Mvae6Tx0syaRLh4MWfnP4sTp/oM+GEauhyuQM5+QWuk=
-github.com/yunarta/terraform-provider-commons v1.0.2/go.mod h1:8jL2esDNbF7MBfmE2gbrs45NSYnDk8XfRtpkpjxgXNU=
+github.com/yunarta/terraform-provider-commons v1.0.3 h1:+eHAfpObrOr3WKvGhZzZAYsPphiMmZOiF1pHhF82lOQ=
+github.com/yunarta/terraform-provider-commons v1.0.3/go.mod h1:8jL2esDNbF7MBfmE2gbrs45NSYnDk8XfRtpkpjxgXNU=
 golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d/go.mod h1:IxCIyHEi3zRg3s0A5j5BB6A9Jmi73HwBIUl50j+osU4=
 golang.org/x/crypto v0.24.0 h1:mnl8DM0o513X8fdIkmyFE/5hTYxbwYOjDS/+rK6qpRI=
 golang.org/x/crypto v0.24.0/go.mod h1:Z1PMYSOR5nyMcyAVAIQSKCDwalqy85Aqn1x3Ws4L5DM=
