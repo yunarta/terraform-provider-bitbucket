@@ -61,6 +61,37 @@ func (receiver *RepositoryResource) Metadata(ctx context.Context, request resour
 	response.TypeName = request.ProviderTypeName + "_repository"
 }
 
+type createSlug struct {
+}
+
+func (r createSlug) Description(ctx context.Context) string {
+	return "If the value of this attribute changes, Terraform will destroy and recreate the resource."
+}
+
+func (r createSlug) MarkdownDescription(ctx context.Context) string {
+	return "If the value of this attribute changes, Terraform will destroy and recreate the resource."
+}
+
+func (r createSlug) PlanModifyString(ctx context.Context, request planmodifier.StringRequest, response *planmodifier.StringResponse) {
+	var repoName types.String
+	request.Plan.GetAttribute(ctx, path.Root("name"), &repoName)
+
+	// Convert the string to lowercase
+	slug := strings.ToLower(repoName.ValueString())
+
+	// Reduce consecutive spaces to a single space
+	slug = regexp.MustCompile("\\s+").ReplaceAllString(slug, " ")
+
+	// Replace spaces with a single hyphen
+	slug = strings.ReplaceAll(slug, " ", "-")
+
+	// Remove any characters that are not alphanumeric, hyphens, underscores, or dots
+	reg := regexp.MustCompile("[^a-z0-9-_.]")
+	slug = reg.ReplaceAllString(slug, "")
+
+	response.PlanValue = types.StringValue(slug)
+}
+
 func (receiver *RepositoryResource) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -74,6 +105,9 @@ func (receiver *RepositoryResource) Schema(ctx context.Context, request resource
 			},
 			"slug": schema.StringAttribute{
 				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					&createSlug{},
+				},
 			},
 			"name": schema.StringAttribute{
 				Required: true,
