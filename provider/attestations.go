@@ -42,5 +42,5 @@ func CreateAttestation(permissions *bitbucket.ObjectPermission, availablePermiss
 		sort.Strings(users)
 	}
 
-	return userPermissionsMap, userPermissionsMap
+	return userPermissionsMap, groupPermissionsMap
 }
