@@ -132,6 +132,7 @@ func (p *BitbucketProvider) Resources(ctx context.Context) []func() resource.Res
 		NewRepositoryPermissionsResource,
 		NewRepositoryBranchRestrictionsResource,
 		NewRepositoryMergeChecksResource,
+		NewRepositoryDefaultReviewersResource,
 	}
 }
 
