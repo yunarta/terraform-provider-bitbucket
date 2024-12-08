@@ -15,40 +15,46 @@ import (
 )
 
 var (
-	_ resource.Resource              = &ProjectDefaultReviewersResource{}
-	_ resource.ResourceWithConfigure = &ProjectDefaultReviewersResource{}
-	_ ConfigurableReceiver           = &ProjectDefaultReviewersResource{}
+	_ resource.Resource              = &RepositoryDefaultReviewersResource{}
+	_ resource.ResourceWithConfigure = &RepositoryDefaultReviewersResource{}
+	_ ConfigurableReceiver           = &RepositoryDefaultReviewersResource{}
 )
 
-func NewProjectDefaultReviewersResource() resource.Resource {
-	return &ProjectDefaultReviewersResource{}
+func NewRepositoryDefaultReviewersResource() resource.Resource {
+	return &RepositoryDefaultReviewersResource{}
 }
 
-type ProjectDefaultReviewersResource struct {
+type RepositoryDefaultReviewersResource struct {
 	config BitbucketProviderConfig
 	client *bitbucket.Client
 }
 
-func (receiver *ProjectDefaultReviewersResource) getClient() *bitbucket.Client {
+func (receiver *RepositoryDefaultReviewersResource) getClient() *bitbucket.Client {
 	return receiver.client
 }
 
-func (receiver *ProjectDefaultReviewersResource) setConfig(config BitbucketProviderConfig, client *bitbucket.Client) {
+func (receiver *RepositoryDefaultReviewersResource) setConfig(config BitbucketProviderConfig, client *bitbucket.Client) {
 	receiver.config = config
 	receiver.client = client
 }
 
-func (receiver *ProjectDefaultReviewersResource) Metadata(ctx context.Context, request resource.MetadataRequest, response *resource.MetadataResponse) {
-	response.TypeName = request.ProviderTypeName + "_project_default_reviewers"
+func (receiver *RepositoryDefaultReviewersResource) Metadata(ctx context.Context, request resource.MetadataRequest, response *resource.MetadataResponse) {
+	response.TypeName = request.ProviderTypeName + "_repository_default_reviewers"
 }
 
-func (receiver *ProjectDefaultReviewersResource) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
+func (receiver *RepositoryDefaultReviewersResource) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
 				Computed: true,
 			},
 			"project": schema.StringAttribute{
+				Required: true,
+				PlanModifiers: []planmodifier.String{
+					util.ReplaceIfStringDiff(),
+				},
+			},
+			"repository": schema.StringAttribute{
 				Required: true,
 				PlanModifiers: []planmodifier.String{
 					util.ReplaceIfStringDiff(),
@@ -83,16 +89,16 @@ func (receiver *ProjectDefaultReviewersResource) Schema(ctx context.Context, req
 	}
 }
 
-func (receiver *ProjectDefaultReviewersResource) Configure(ctx context.Context, request resource.ConfigureRequest, response *resource.ConfigureResponse) {
+func (receiver *RepositoryDefaultReviewersResource) Configure(ctx context.Context, request resource.ConfigureRequest, response *resource.ConfigureResponse) {
 	ConfigureResource(receiver, ctx, request, response)
 }
 
-func (receiver *ProjectDefaultReviewersResource) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+func (receiver *RepositoryDefaultReviewersResource) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
 	var (
 		diags diag.Diagnostics
 		err   error
 
-		plan ProjectDefaultReviewersModel
+		plan RepositoryDefaultReviewersModel
 	)
 
 	diags = request.Plan.Get(ctx, &plan)
@@ -127,7 +133,7 @@ func (receiver *ProjectDefaultReviewersResource) Create(ctx context.Context, req
 		RequiredApprovals: plan.Requires.ValueInt64(),
 	}
 
-	reply, err := receiver.client.ProjectService().AddDefaultReviewers(plan.Project.ValueString(), defaultReviewers)
+	reply, err := receiver.client.RepositoryService().AddDefaultReviewers(plan.Project.ValueString(), plan.Repository.ValueString(), defaultReviewers)
 	if util.TestError(&response.Diagnostics, err, "Failed to add default reviewer") {
 		return
 	}
@@ -138,12 +144,12 @@ func (receiver *ProjectDefaultReviewersResource) Create(ctx context.Context, req
 	response.Diagnostics.Append(diags...)
 }
 
-func (receiver *ProjectDefaultReviewersResource) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
+func (receiver *RepositoryDefaultReviewersResource) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
 	var (
 		diags diag.Diagnostics
 		err   error
 
-		state ProjectDefaultReviewersModel
+		state RepositoryDefaultReviewersModel
 	)
 
 	diags = request.State.Get(ctx, &state)
@@ -151,7 +157,7 @@ func (receiver *ProjectDefaultReviewersResource) Read(ctx context.Context, reque
 		return
 	}
 
-	reviewers, err := receiver.client.ProjectService().ReadDefaultReviewers(state.Project.ValueString(), state.Id.ValueInt64())
+	reviewers, err := receiver.client.RepositoryService().ReadDefaultReviewers(state.Project.ValueString(), state.Repository.ValueString(), state.Id.ValueInt64())
 	if util.TestError(&response.Diagnostics, err, "Failed get default reviewers") {
 		return
 	}
@@ -180,11 +186,11 @@ func (receiver *ProjectDefaultReviewersResource) Read(ctx context.Context, reque
 	response.Diagnostics.Append(diags...)
 }
 
-func (receiver *ProjectDefaultReviewersResource) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+func (receiver *RepositoryDefaultReviewersResource) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
 	var (
 		diags       diag.Diagnostics
 		err         error
-		plan, state ProjectDefaultReviewersModel
+		plan, state RepositoryDefaultReviewersModel
 	)
 
 	diags = request.Plan.Get(ctx, &plan)
@@ -225,7 +231,7 @@ func (receiver *ProjectDefaultReviewersResource) Update(ctx context.Context, req
 		RequiredApprovals: plan.Requires.ValueInt64(),
 	}
 
-	err = receiver.client.ProjectService().UpdateDefaultReviewers(plan.Project.ValueString(), state.Id.ValueInt64(), defaultReviewers)
+	err = receiver.client.RepositoryService().UpdateDefaultReviewers(plan.Project.ValueString(), plan.Repository.ValueString(), state.Id.ValueInt64(), defaultReviewers)
 	if util.TestError(&response.Diagnostics, err, "Failed to update default reviewer") {
 		return
 	}
@@ -236,12 +242,12 @@ func (receiver *ProjectDefaultReviewersResource) Update(ctx context.Context, req
 	response.Diagnostics.Append(diags...)
 }
 
-func (receiver *ProjectDefaultReviewersResource) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
+func (receiver *RepositoryDefaultReviewersResource) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
 	var (
 		diags diag.Diagnostics
 		err   error
 
-		state ProjectDefaultReviewersModel
+		state RepositoryDefaultReviewersModel
 	)
 
 	diags = request.State.Get(ctx, &state)
@@ -249,7 +255,7 @@ func (receiver *ProjectDefaultReviewersResource) Delete(ctx context.Context, req
 		return
 	}
 
-	err = receiver.client.ProjectService().DeleteDefaultReviewers(state.Project.ValueString(), state.Id.ValueInt64())
+	err = receiver.client.RepositoryService().DeleteDefaultReviewers(state.Project.ValueString(), state.Repository.ValueString(), state.Id.ValueInt64())
 	if util.TestError(&response.Diagnostics, err, "Failed to delete default reviewer") {
 		return
 	}
