@@ -120,7 +120,7 @@ func (receiver *ProjectDefaultReviewersResource) Create(ctx context.Context, req
 		TargetMatcher: bitbucket.TargetMatcher{
 			Id: plan.Target.ValueString(),
 			Type: bitbucket.DefaultReviewerId{
-				Id: refTypesMap[plan.SourceType.ValueString()],
+				Id: refTypesMap[plan.TargetType.ValueString()],
 			},
 		},
 		Reviewers:         reviewers,
