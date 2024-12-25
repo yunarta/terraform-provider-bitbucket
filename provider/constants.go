@@ -3,6 +3,7 @@ package provider
 const errorFailedToUpdateState = "Failed to update resource state"
 
 const errorFailedToCreateRepository = "Failed to create repository"
+const errorFailedToReadRepository = "Failed to read repository"
 const errorFailedToUpdateRepository = "Failed to update repository"
 const errorFailedToDeleteRepository = "Failed to delete repository"
 const errorFailedToInitializeRepository = "Failed to initialize repository"

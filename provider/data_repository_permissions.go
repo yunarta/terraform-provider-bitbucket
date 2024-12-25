@@ -11,10 +11,10 @@ import (
 )
 
 type RepositoryPermissionsData struct {
-	Key    string              `tfsdk:"key"`
-	Slug   string              `tfsdk:"slug"`
-	Users  map[string][]string `tfsdk:"users"`
-	Groups map[string][]string `tfsdk:"groups"`
+	Project string              `tfsdk:"project"`
+	Slug    string              `tfsdk:"slug"`
+	Users   map[string][]string `tfsdk:"users"`
+	Groups  map[string][]string `tfsdk:"groups"`
 }
 
 var (
@@ -48,7 +48,7 @@ func (receiver *RepositoryPermissionsDataSource) Metadata(ctx context.Context, r
 func (receiver *RepositoryPermissionsDataSource) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"key": schema.StringAttribute{
+			"project": schema.StringAttribute{
 				Required: true,
 			},
 			"slug": schema.StringAttribute{
@@ -81,13 +81,13 @@ func (receiver *RepositoryPermissionsDataSource) Read(ctx context.Context, reque
 		return
 	}
 
-	permissions, err := receiver.client.RepositoryService().ReadPermissions(config.Key, config.Slug)
+	permissions, err := receiver.client.RepositoryService().ReadPermissions(config.Project, config.Slug)
 	if util.TestError(&response.Diagnostics, err, "") {
 		return
 	}
 
 	if permissions == nil {
-		response.Diagnostics.AddError("Unable to find deployment", config.Key)
+		response.Diagnostics.AddError("Unable to find deployment", config.Project)
 		return
 	}
 
@@ -97,9 +97,9 @@ func (receiver *RepositoryPermissionsDataSource) Read(ctx context.Context, reque
 	}
 
 	diags = response.State.Set(ctx, &RepositoryPermissionsData{
-		Key:    config.Key,
-		Users:  users,
-		Groups: groups,
+		Project: config.Project,
+		Users:   users,
+		Groups:  groups,
 	})
 	if util.TestDiagnostic(&response.Diagnostics, diags) {
 		return
