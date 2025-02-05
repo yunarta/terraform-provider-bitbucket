@@ -100,6 +100,11 @@ func (receiver *RepositoryResource) Schema(ctx context.Context, request resource
 				Computed: true,
 				Default:  booldefault.StaticBool(true),
 			},
+			"archive_on_delete": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(true),
+			},
 			"id": schema.StringAttribute{
 				Computed: true,
 			},
@@ -400,10 +405,21 @@ func (receiver *RepositoryResource) Delete(ctx context.Context, request resource
 			return
 		}
 
-		err = receiver.client.RepositoryService().Delete(
-			state.Project.ValueString(),
-			state.Slug.ValueString(),
-		)
+		if state.ArchiveOnDelete.ValueBool() {
+
+			currentTime := time.Now().Format("2006-01-02-15-04-05")
+			err = receiver.client.RepositoryService().Rename(
+				state.Project.ValueString(),
+				state.Slug.ValueString(),
+				fmt.Sprintf("%s-archived-at-%s", state.Slug.ValueString(), currentTime),
+			)
+		} else {
+			err = receiver.client.RepositoryService().Delete(
+				state.Project.ValueString(),
+				state.Slug.ValueString(),
+			)
+		}
+
 		if util.TestError(&response.Diagnostics, err, errorFailedToDeleteRepository) {
 			return
 		}
