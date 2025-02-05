@@ -9,14 +9,15 @@ import (
 )
 
 type RepositoryModel struct {
-	ID             types.String `tfsdk:"id"`
-	RetainOnDelete types.Bool   `tfsdk:"retain_on_delete"`
-	Project        types.String `tfsdk:"project"`
-	Slug           types.String `tfsdk:"slug"`
-	Name           types.String `tfsdk:"name"`
-	Description    types.String `tfsdk:"description"`
-	Readme         types.String `tfsdk:"readme"`
-	Path           types.String `tfsdk:"path"`
+	ID              types.String `tfsdk:"id"`
+	RetainOnDelete  types.Bool   `tfsdk:"retain_on_delete"`
+	ArchiveOnDelete types.Bool   `tfsdk:"archive_on_delete"`
+	Project         types.String `tfsdk:"project"`
+	Slug            types.String `tfsdk:"slug"`
+	Name            types.String `tfsdk:"name"`
+	Description     types.String `tfsdk:"description"`
+	Readme          types.String `tfsdk:"readme"`
+	Path            types.String `tfsdk:"path"`
 
 	AssignmentVersion types.String `tfsdk:"assignment_version"`
 	Assignments       types.List   `tfsdk:"assignments"`
@@ -45,6 +46,7 @@ func NewRepositoryModel(repository *bitbucket.Repository, plan RepositoryModel, 
 		Description:       plan.Description,
 		Project:           plan.Project,
 		RetainOnDelete:    plan.RetainOnDelete,
+		ArchiveOnDelete:   plan.ArchiveOnDelete,
 		Readme:            plan.Readme,
 		Path:              plan.Path,
 		AssignmentVersion: plan.AssignmentVersion,
