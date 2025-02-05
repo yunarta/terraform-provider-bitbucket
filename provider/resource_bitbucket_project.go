@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/yunarta/terraform-atlassian-api-client/bitbucket"
@@ -50,7 +49,6 @@ func (receiver *ProjectResource) schemaV0() schema.Schema {
 			"retain_on_delete": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
-				Default:  booldefault.StaticBool(false),
 			},
 			"id": schema.Int64Attribute{
 				Computed: true,
@@ -86,7 +84,6 @@ func (receiver *ProjectResource) schemaV1() schema.Schema {
 			"retain_on_delete": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
-				Default:  booldefault.StaticBool(false),
 			},
 			"id": schema.Int64Attribute{
 				Computed: true,

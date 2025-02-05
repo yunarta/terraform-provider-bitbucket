@@ -5,7 +5,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/yunarta/terraform-atlassian-api-client/bitbucket"
 	"github.com/yunarta/terraform-provider-commons/util"
@@ -48,7 +47,6 @@ func (receiver *RepositoryPermissionsResource) Schema(ctx context.Context, reque
 			"retain_on_delete": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
-				Default:  booldefault.StaticBool(false),
 			},
 			"project": schema.StringAttribute{
 				Required: true,

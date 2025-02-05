@@ -5,7 +5,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/yunarta/terraform-atlassian-api-client/bitbucket"
@@ -49,7 +48,6 @@ func (receiver *ProjectPermissionsResource) schemaV0() schema.Schema {
 			"retain_on_delete": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
-				Default:  booldefault.StaticBool(false),
 			},
 			"key": schema.StringAttribute{
 				Required: true,
@@ -76,7 +74,6 @@ func (receiver *ProjectPermissionsResource) schemaV1() schema.Schema {
 			"retain_on_delete": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
-				Default:  booldefault.StaticBool(false),
 			},
 			"project": schema.StringAttribute{
 				Required: true,
