@@ -47,7 +47,7 @@ func (m ProjectModel) getAssignment(ctx context.Context) (Assignments, diag.Diag
 
 func FromProjectModel0(plan ProjectModel0) *ProjectModel {
 	return &ProjectModel{
-		RetainOnDelete:    plan.RetainOnDelete,
+		RetainOnDelete:    types.BoolValue(plan.RetainOnDelete.ValueBool()),
 		ID:                plan.ID,
 		Project:           plan.Key,
 		Name:              plan.Name,
@@ -61,7 +61,7 @@ func FromProjectModel0(plan ProjectModel0) *ProjectModel {
 
 func NewProjectModel(plan ProjectModel, project *bitbucket.Project, assignmentResult *AssignmentResult) *ProjectModel {
 	return &ProjectModel{
-		RetainOnDelete:    plan.RetainOnDelete,
+		RetainOnDelete:    types.BoolValue(plan.RetainOnDelete.ValueBool()),
 		ID:                types.Int64Value(project.ID),
 		Project:           types.StringValue(project.Key),
 		Name:              types.StringValue(project.Name),

@@ -31,7 +31,7 @@ func (m RepositoryPermissionsModel) getAssignment(ctx context.Context) (Assignme
 
 func NewRepositoryPermissionsModel(plan RepositoryPermissionsModel, assignmentResult *AssignmentResult) *RepositoryPermissionsModel {
 	return &RepositoryPermissionsModel{
-		RetainOnDelete:    plan.RetainOnDelete,
+		RetainOnDelete:    types.BoolValue(plan.RetainOnDelete.ValueBool()),
 		Project:           plan.Project,
 		Slug:              plan.Slug,
 		AssignmentVersion: plan.AssignmentVersion,
