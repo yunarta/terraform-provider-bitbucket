@@ -71,6 +71,7 @@ func (receiver *ProjectPermissionsResource) schemaV0() schema.Schema {
 
 func (receiver *ProjectPermissionsResource) schemaV1() schema.Schema {
 	return schema.Schema{
+		Version: 1,
 		Attributes: map[string]schema.Attribute{
 			"retain_on_delete": schema.BoolAttribute{
 				Optional: true,
