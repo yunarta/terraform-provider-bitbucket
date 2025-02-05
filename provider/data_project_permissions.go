@@ -11,9 +11,9 @@ import (
 )
 
 type ProjectPermissionsData struct {
-	Key    string              `tfsdk:"key"`
-	Users  map[string][]string `tfsdk:"users"`
-	Groups map[string][]string `tfsdk:"groups"`
+	Project string              `tfsdk:"project"`
+	Users   map[string][]string `tfsdk:"users"`
+	Groups  map[string][]string `tfsdk:"groups"`
 }
 
 var (
@@ -47,7 +47,7 @@ func (receiver *ProjectPermissionsDataSource) Metadata(ctx context.Context, requ
 func (receiver *ProjectPermissionsDataSource) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"key": schema.StringAttribute{
+			"project": schema.StringAttribute{
 				Required: true,
 			},
 			"users": schema.MapAttribute{
@@ -77,13 +77,13 @@ func (receiver *ProjectPermissionsDataSource) Read(ctx context.Context, request 
 		return
 	}
 
-	permissions, err := receiver.client.ProjectService().ReadPermissions(config.Key)
+	permissions, err := receiver.client.ProjectService().ReadPermissions(config.Project)
 	if util.TestError(&response.Diagnostics, err, "") {
 		return
 	}
 
 	if permissions == nil {
-		response.Diagnostics.AddError("Unable to find deployment", config.Key)
+		response.Diagnostics.AddError("Unable to find deployment", config.Project)
 		return
 	}
 
@@ -93,9 +93,9 @@ func (receiver *ProjectPermissionsDataSource) Read(ctx context.Context, request 
 	}
 
 	diags = response.State.Set(ctx, &ProjectPermissionsData{
-		Key:    config.Key,
-		Users:  users,
-		Groups: groups,
+		Project: config.Project,
+		Users:   users,
+		Groups:  groups,
 	})
 	if util.TestDiagnostic(&response.Diagnostics, diags) {
 		return

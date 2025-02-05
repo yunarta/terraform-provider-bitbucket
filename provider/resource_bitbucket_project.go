@@ -14,11 +14,12 @@ import (
 )
 
 var (
-	_ resource.Resource                = &ProjectResource{}
-	_ resource.ResourceWithConfigure   = &ProjectResource{}
-	_ resource.ResourceWithImportState = &ProjectResource{}
-	_ ProjectPermissionsReceiver       = &ProjectResource{}
-	_ ConfigurableReceiver             = &ProjectResource{}
+	_ resource.Resource                 = &ProjectResource{}
+	_ resource.ResourceWithConfigure    = &ProjectResource{}
+	_ resource.ResourceWithImportState  = &ProjectResource{}
+	_ resource.ResourceWithUpgradeState = &ProjectResource{}
+	_ ProjectPermissionsReceiver        = &ProjectResource{}
+	_ ConfigurableReceiver              = &ProjectResource{}
 )
 
 func NewProjectResource() resource.Resource {
@@ -43,13 +44,13 @@ func (receiver *ProjectResource) Metadata(ctx context.Context, request resource.
 	response.TypeName = request.ProviderTypeName + "_project"
 }
 
-func (receiver *ProjectResource) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
-	response.Schema = schema.Schema{
+func (receiver *ProjectResource) schemaV0() schema.Schema {
+	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"retain_on_delete": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
-				Default:  booldefault.StaticBool(true),
+				Default:  booldefault.StaticBool(false),
 			},
 			"id": schema.Int64Attribute{
 				Computed: true,
@@ -78,6 +79,66 @@ func (receiver *ProjectResource) Schema(ctx context.Context, request resource.Sc
 	}
 }
 
+func (receiver *ProjectResource) schemaV1() schema.Schema {
+	return schema.Schema{
+		Version: 1,
+		Attributes: map[string]schema.Attribute{
+			"retain_on_delete": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+			},
+			"id": schema.Int64Attribute{
+				Computed: true,
+			},
+			"project": schema.StringAttribute{
+				Required: true,
+				PlanModifiers: []planmodifier.String{
+					util.ReplaceIfStringDiff(),
+				},
+			},
+			"name": schema.StringAttribute{
+				Required: true,
+			},
+			"description": schema.StringAttribute{
+				Optional: true,
+			},
+			"assignment_version": schema.StringAttribute{
+				Optional: true,
+			},
+			"computed_users":  ComputedAssignmentSchema,
+			"computed_groups": ComputedAssignmentSchema,
+		},
+		Blocks: map[string]schema.Block{
+			"assignments": AssignmentSchema("PROJECT_ADMIN", "REPO_CREATE", "PROJECT_READ", "PROJECT_WRITE"),
+		},
+	}
+}
+
+func (receiver *ProjectResource) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
+	response.Schema = receiver.schemaV1()
+}
+
+func (receiver *ProjectResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	v0 := receiver.schemaV0()
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema:   &v0,
+			StateUpgrader: receiver.upgradeExampleResourceStateV0toV1,
+		},
+	}
+}
+
+func (receiver *ProjectResource) upgradeExampleResourceStateV0toV1(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+	var old ProjectModel0
+	req.State.Get(ctx, &old)
+
+	diags := resp.State.Set(ctx, FromProjectModel0(old))
+	if util.TestDiagnostic(&resp.Diagnostics, diags) {
+		return
+	}
+}
+
 func (receiver *ProjectResource) Configure(ctx context.Context, request resource.ConfigureRequest, response *resource.ConfigureResponse) {
 	ConfigureResource(receiver, ctx, request, response)
 }
@@ -94,7 +155,7 @@ func (receiver *ProjectResource) Create(ctx context.Context, request resource.Cr
 	}
 
 	project, err := receiver.client.ProjectService().Create(bitbucket.CreateProject{
-		Key:         plan.Key.ValueString(),
+		Key:         plan.Project.ValueString(),
 		Name:        plan.Name.ValueString(),
 		Description: plan.Description.ValueString(),
 	})
@@ -134,7 +195,7 @@ func (receiver *ProjectResource) Read(ctx context.Context, request resource.Read
 		return
 	}
 
-	project, err := receiver.client.ProjectService().Read(state.Key.ValueString())
+	project, err := receiver.client.ProjectService().Read(state.Project.ValueString())
 	if util.TestError(&response.Diagnostics, err, "Failed to create project") {
 		return
 	}
@@ -168,7 +229,7 @@ func (receiver *ProjectResource) Update(ctx context.Context, request resource.Up
 		return
 	}
 
-	project, err := receiver.client.ProjectService().Update(plan.Key.ValueString(), bitbucket.ProjectUpdate{
+	project, err := receiver.client.ProjectService().Update(plan.Project.ValueString(), bitbucket.ProjectUpdate{
 		Name:        plan.Name.ValueString(),
 		Description: plan.Description.ValueString(),
 	})
@@ -203,7 +264,7 @@ func (receiver *ProjectResource) Delete(ctx context.Context, request resource.De
 	}
 
 	if !state.RetainOnDelete.ValueBool() {
-		err := receiver.client.ProjectService().Delete(state.Key.ValueString())
+		err := receiver.client.ProjectService().Delete(state.Project.ValueString())
 		if util.TestError(&response.Diagnostics, err, "Failed to delete project") {
 			return
 		}
@@ -214,7 +275,7 @@ func (receiver *ProjectResource) Delete(ctx context.Context, request resource.De
 
 func (receiver *ProjectResource) ImportState(ctx context.Context, request resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	diags := response.State.Set(ctx, &ProjectModel{
-		Key:            types.StringValue(request.ID),
+		Project:        types.StringValue(request.ID),
 		Assignments:    types.ListNull(assignmentType),
 		ComputedUsers:  types.ListNull(computedAssignmentType),
 		ComputedGroups: types.ListNull(computedAssignmentType),

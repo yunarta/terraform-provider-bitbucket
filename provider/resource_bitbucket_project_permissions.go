@@ -13,11 +13,12 @@ import (
 )
 
 var (
-	_ resource.Resource                = &ProjectPermissionsResource{}
-	_ resource.ResourceWithConfigure   = &ProjectPermissionsResource{}
-	_ resource.ResourceWithImportState = &ProjectPermissionsResource{}
-	_ ProjectPermissionsReceiver       = &ProjectPermissionsResource{}
-	_ ConfigurableReceiver             = &ProjectPermissionsResource{}
+	_ resource.Resource                 = &ProjectPermissionsResource{}
+	_ resource.ResourceWithConfigure    = &ProjectPermissionsResource{}
+	_ resource.ResourceWithImportState  = &ProjectPermissionsResource{}
+	_ resource.ResourceWithUpgradeState = &ProjectPermissionsResource{}
+	_ ProjectPermissionsReceiver        = &ProjectPermissionsResource{}
+	_ ConfigurableReceiver              = &ProjectPermissionsResource{}
 )
 
 func NewProjectPermissionsResource() resource.Resource {
@@ -42,13 +43,13 @@ func (receiver *ProjectPermissionsResource) Metadata(ctx context.Context, reques
 	response.TypeName = request.ProviderTypeName + "_project_permissions"
 }
 
-func (receiver *ProjectPermissionsResource) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
-	response.Schema = schema.Schema{
+func (receiver *ProjectPermissionsResource) schemaV0() schema.Schema {
+	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"retain_on_delete": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
-				Default:  booldefault.StaticBool(true),
+				Default:  booldefault.StaticBool(false),
 			},
 			"key": schema.StringAttribute{
 				Required: true,
@@ -65,6 +66,56 @@ func (receiver *ProjectPermissionsResource) Schema(ctx context.Context, request 
 		Blocks: map[string]schema.Block{
 			"assignments": AssignmentSchema("PROJECT_ADMIN", "REPO_CREATE", "PROJECT_READ", "PROJECT_WRITE"),
 		},
+	}
+}
+
+func (receiver *ProjectPermissionsResource) schemaV1() schema.Schema {
+	return schema.Schema{
+		Attributes: map[string]schema.Attribute{
+			"retain_on_delete": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+			},
+			"project": schema.StringAttribute{
+				Required: true,
+				PlanModifiers: []planmodifier.String{
+					util.ReplaceIfStringDiff(),
+				},
+			},
+			"assignment_version": schema.StringAttribute{
+				Optional: true,
+			},
+			"computed_users":  ComputedAssignmentSchema,
+			"computed_groups": ComputedAssignmentSchema,
+		},
+		Blocks: map[string]schema.Block{
+			"assignments": AssignmentSchema("PROJECT_ADMIN", "REPO_CREATE", "PROJECT_READ", "PROJECT_WRITE"),
+		},
+	}
+}
+
+func (receiver *ProjectPermissionsResource) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
+	response.Schema = receiver.schemaV1()
+}
+
+func (receiver *ProjectPermissionsResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	v0 := receiver.schemaV0()
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema:   &v0,
+			StateUpgrader: receiver.upgradeExampleResourceStateV0toV1,
+		},
+	}
+}
+
+func (receiver *ProjectPermissionsResource) upgradeExampleResourceStateV0toV1(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+	var old ProjectPermissionsModel0
+	req.State.Get(ctx, &old)
+
+	diags := resp.State.Set(ctx, FromProjectPermissionsModel0(old))
+	if util.TestDiagnostic(&resp.Diagnostics, diags) {
+		return
 	}
 }
 
@@ -174,7 +225,7 @@ func (receiver *ProjectPermissionsResource) Delete(ctx context.Context, request 
 
 func (receiver *ProjectPermissionsResource) ImportState(ctx context.Context, request resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	diags := response.State.Set(ctx, &ProjectPermissionsModel{
-		Key:            types.StringValue(request.ID),
+		Project:        types.StringValue(request.ID),
 		Assignments:    types.ListNull(assignmentType),
 		ComputedUsers:  types.ListNull(computedAssignmentType),
 		ComputedGroups: types.ListNull(computedAssignmentType),
