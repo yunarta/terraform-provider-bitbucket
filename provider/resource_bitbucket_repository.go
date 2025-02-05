@@ -98,7 +98,7 @@ func (receiver *RepositoryResource) Schema(ctx context.Context, request resource
 			"retain_on_delete": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
-				Default:  booldefault.StaticBool(true),
+				Default:  booldefault.StaticBool(false),
 			},
 			"archive_on_delete": schema.BoolAttribute{
 				Optional: true,
