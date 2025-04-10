@@ -170,11 +170,13 @@ func (receiver *ProjectDefaultReviewersResource) Read(ctx context.Context, reque
 		users = append(users, user.Name)
 	}
 
+	sort.Strings(users)
+	
 	state.Source = types.StringValue(reviewers.SourceMatcher.Id)
 	state.SourceType = types.StringValue(refTypesReverseMap[reviewers.SourceMatcher.Type.Id])
 	state.Target = types.StringValue(reviewers.TargetMatcher.Id)
 	state.TargetType = types.StringValue(refTypesReverseMap[reviewers.TargetMatcher.Type.Id])
-	state.Reviewers = sort.String(users)
+	state.Reviewers = users
 	state.Requires = types.Int64Value(reviewers.RequiredApprovals)
 
 	diags = response.State.Set(ctx, state)
