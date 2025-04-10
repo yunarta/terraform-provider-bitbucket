@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"sort"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -173,7 +174,7 @@ func (receiver *ProjectDefaultReviewersResource) Read(ctx context.Context, reque
 	state.SourceType = types.StringValue(refTypesReverseMap[reviewers.SourceMatcher.Type.Id])
 	state.Target = types.StringValue(reviewers.TargetMatcher.Id)
 	state.TargetType = types.StringValue(refTypesReverseMap[reviewers.TargetMatcher.Type.Id])
-	state.Reviewers = users
+	state.Reviewers = sort.String(users)
 	state.Requires = types.Int64Value(reviewers.RequiredApprovals)
 
 	diags = response.State.Set(ctx, state)
