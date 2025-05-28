@@ -48,7 +48,7 @@ func (receiver *RepositoryPermissionsResource) Schema(ctx context.Context, reque
 			"retain_on_delete": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
-				Default:  booldefault.StaticBool(true),
+				Default:  booldefault.StaticBool(false),
 			},
 			"project": schema.StringAttribute{
 				Required: true,
