@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/yunarta/terraform-atlassian-api-client/bitbucket"
 	"github.com/yunarta/terraform-provider-commons/util"
+	"sort"
 )
 
 var (
@@ -174,6 +175,8 @@ func (receiver *RepositoryDefaultReviewersResource) Read(ctx context.Context, re
 	for _, user := range reviewers.Reviewers {
 		users = append(users, user.Name)
 	}
+
+	sort.Strings(users)
 
 	state.Source = types.StringValue(reviewers.SourceMatcher.Id)
 	state.SourceType = types.StringValue(refTypesReverseMap[reviewers.SourceMatcher.Type.Id])
