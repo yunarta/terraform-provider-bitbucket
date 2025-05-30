@@ -272,7 +272,7 @@ func updateGroups(inStateAssignmentOrder AssignmentOrder, plannedAssignmentOrder
 		})
 
 		if inStatePermission != requestedPermission || forceUpdate {
-			err = updateGroupPermission(group, requestedPermission)
+			err = updateGroupPermission(found.Name, requestedPermission)
 			if err != nil {
 				return nil, []diag.Diagnostic{diag.NewErrorDiagnostic(errorFailedToUpdateGroupPermission, err.Error())}
 			}
@@ -280,7 +280,12 @@ func updateGroups(inStateAssignmentOrder AssignmentOrder, plannedAssignmentOrder
 	}
 
 	for _, group := range removing {
-		err := updateGroupPermission(group, "")
+		found, err := userService.FindGroup(group)
+		if found == nil {
+			continue
+		}
+
+		err := updateGroupPermission(found.Name, "")
 		if err != nil {
 			return nil, []diag.Diagnostic{diag.NewErrorDiagnostic("Failed to remove group permission", err.Error())}
 		}
@@ -304,7 +309,7 @@ func RemoveAssignment(ctx context.Context,
 	}
 
 	for _, group := range assignedPermissions.Groups {
-		if _, ok := assignmentOrder.Groups[group.Owner.Name]; ok {
+		if _, ok := assignmentOrder.Groups[strings.ToLower(group.Owner.Name)]; ok {
 			err := updateGroupPermission(group.Owner.Name, "")
 			if err != nil {
 				return []diag.Diagnostic{diag.NewErrorDiagnostic(errorFailedToRemoveGroupPermission, err.Error())}
@@ -331,7 +336,7 @@ func ComputeAssignment(ctx context.Context,
 	}
 
 	for _, group := range assignedPermissions.Groups {
-		if _, ok := assignmentOrder.Groups[group.Owner.Name]; ok {
+		if _, ok := assignmentOrder.Groups[strings.ToLower(group.Owner.Name)]; ok {
 			computedGroups = append(computedGroups, ComputedAssignment{
 				Name:       group.Owner.Name,
 				Permission: group.Permission,
