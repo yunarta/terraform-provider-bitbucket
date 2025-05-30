@@ -285,7 +285,7 @@ func updateGroups(inStateAssignmentOrder AssignmentOrder, plannedAssignmentOrder
 			continue
 		}
 
-		err := updateGroupPermission(found.Name, "")
+		err = updateGroupPermission(found.Name, "")
 		if err != nil {
 			return nil, []diag.Diagnostic{diag.NewErrorDiagnostic("Failed to remove group permission", err.Error())}
 		}
